@@ -129,6 +129,7 @@ Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
+Tomas William Fitzgerald - [@tomaswfitz](https://twitter.com/tomaswfitz) - tomas@ebi.ac.uk
 
 * Ewan Birney[@ewanbirney]
 * []()
