@@ -33,8 +33,6 @@
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
-<!-- * [Roadmap](#roadmap) -->
-<!-- * [Contributing](#contributing) -->
 * [License](#license)
 * [Contact](#contact)
 * [Acknowledgements](#acknowledgements)
@@ -73,11 +71,11 @@ npm install npm@latest -g
 
 1. Clone the repo
 ```sh
-git clone https://github.com/github_username/repo_name.git
+git clone https://github.com/tf/CNest.git
 ```
 2. Install NPM packages
 ```sh
-npm install
+docker build --tag cnv:1.0 .
 ```
 
 
@@ -129,9 +127,8 @@ Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
-Tomas William Fitzgerald - [@tomaswfitz](https://twitter.com/tomaswfitz) - tomas@ebi.ac.uk
+Ewan Birney - [@ewanbirney](https://twitter.com/ewanbirney)
 
-* Ewan Birney[@ewanbirney]
 * []()
 * []()
 
