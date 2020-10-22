@@ -124,9 +124,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Tomas William Fitzgerald - [@tomaswfitz](https://twitter.com/tomaswfitz) - tomas@ebi.ac.uk
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 
 
 
