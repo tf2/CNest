@@ -3,7 +3,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/tf2/CNest">
-    <img src="src/fluff/cnv_logo.png" alt="Logo" width="400" height="200">
+    <img src="src/fluff/cnv_logo.png" alt="Logo" width="300" height="200">
   </a>
 
   <h3 align="center">CNest - the copy number estimator</h3>
@@ -42,11 +42,11 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![CNest GWAS][product-screenshot]](https://example.com)
 
-Here's a blank template to get started:
+These methods allow large scale CNV detection from very large WGS and WES datasets and generate all the required information for proper genome wide association testing for copy number differences.
 **To avoid retyping too much info. Do a search and replace with your text editor for the following:**
-`github_username`, `repo_name`, `twitter_handle`, `email`
+`tf2`, `CNest`
 
 
 ### Built With
@@ -69,7 +69,7 @@ Docker
 ```sh
 git clone https://github.com/tf/CNest.git
 ```
-2. Install NPM packages
+2. Build the docker image
 ```sh
 docker build --tag cnv:1.0 .
 ```
@@ -108,7 +108,7 @@ Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 Ewan Birney - [@ewanbirney](https://twitter.com/ewanbirney)
-
+Shimin Shuai
 * []()
 * []()
 
