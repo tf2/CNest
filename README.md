@@ -3,7 +3,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/tf2/CNest">
-    <img src="src/fluff/cnv_logo.png" alt="Logo" width="300" height="200">
+    <img src="src/fluff/cnv_logo.png" alt="Logo" width="250" height="150">
   </a>
 
   <h3 align="center">CNest - The Copy Number Estimator</h3>
