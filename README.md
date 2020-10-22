@@ -38,7 +38,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![CNest GWAS][product-screenshot]](https://example.com)
+[![CNest GWAS][product-screenshot]](https://github.com/tf2/CNest/src/fluff/cnv_gwas.png)
 
 These methods allow large scale CNV detection from very large WGS and WES datasets and generate all the required information for proper genome wide association testing for copy number differences.
 
