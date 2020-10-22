@@ -3,7 +3,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/tf2/CNest">
-    <img src="src/fluff/cnv_logo.png" alt="Logo" width="480" height="180">
+    <img src="src/fluff/cnv_logo.png" alt="Logo" width="400" height="200">
   </a>
 
   <h3 align="center">CNest - the copy number estimator</h3>
@@ -33,8 +33,8 @@
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
+<!-- * [Roadmap](#roadmap) -->
+<!-- * [Contributing](#contributing) -->
 * [License](#license)
 * [Contact](#contact)
 * [Acknowledgements](#acknowledgements)
@@ -53,10 +53,7 @@ Here's a blank template to get started:
 
 ### Built With
 
-* []()
-* []()
-* []()
-
+* [Docker](https://docs.docker.com/)
 
 
 <!-- GETTING STARTED -->
@@ -133,7 +130,7 @@ Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
-* []()
+* Ewan Birney[@ewanbirney]
 * []()
 * []()
 
