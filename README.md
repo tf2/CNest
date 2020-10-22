@@ -2,8 +2,8 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/tf2/CNest">
+    <img src="src/fluff/cnv_logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">CNest - the copy number estimator</h3>
