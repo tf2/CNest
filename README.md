@@ -9,7 +9,7 @@
   <h3 align="center">CNest - the copy number estimator</h3>
 
   <p align="center">
-    Docker Implementation for Copy Number Method - detection and genome wide association testing 
+    Docker Implementation for CNest - Detection and Genome Wide Association Testing 
     <br />
     <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
     <br />
