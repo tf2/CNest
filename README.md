@@ -2,7 +2,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <a href="https://github.com/tf2/CNest/src/fluff/cnv_logo">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
