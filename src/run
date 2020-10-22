@@ -1,0 +1,117 @@
+#!/bin/bash
+
+step_to_run=$1
+
+if [ $step_to_run = "step1" ]
+then
+	project_name=$2
+	if [[ $project_name != "" ]]
+	then
+		/software/applications/ngscnv/ngs /output_location/${project_name} new-project
+		/software/applications/ngscnv/ngs /output_location/${project_name} add-baits /resources/index.txt
+		cp /resources/index_tab.txt /output_location/${project_name}
+	fi
+fi
+
+if [ $step_to_run = "step2" ]
+then
+	project_name=$2
+	input_file_name=$3
+	sample_id=$4
+	if [[ $project_name != "" && $input_file_name != ""  && $sample_id != "" ]]
+	then
+		project_root=/output_location/${project_name}
+		mkdir -p ${project_root}/txt/
+		echo $project_name $input_file_name $sample_id
+		/software/applications/ngscnv/ngs ${project_root} bam-to-rd /input_location/$input_file_name $sample_id
+		/software/applications/ngscnv/ngs ${project_root} rd-dump $sample_id > ${project_root}/txt/$sample_id
+		mkdir -p ${project_root}/bin/
+		mkdir -p ${project_root}/tmp/
+		Rscript /resources/run.R processtobin ${project_root} $sample_id
+		rm ${project_root}/$sample_id
+		rm ${project_root}/txt/$sample_id
+	fi
+fi
+
+if [ $step_to_run = "step3" ]
+then
+	project_name=$2
+	if [[ $project_name != "" ]]
+	then
+		project_root=/output_location/${project_name}
+		index_file=${project_root}/index_tab.txt
+		qc_file=${project_root}/gender_qc.txt
+		gender_file=${project_root}/gender_classification.txt
+		Rscript /resources/run.R classify_gender ${project_root} ${index_file} ${qc_file} ${gender_file}
+	fi
+fi
+
+
+if [ $step_to_run = "step4" ]
+then
+	project_name=$2
+	sample_index=$3
+	if [[ $project_name != "" && $sample_index != "" ]]
+	then
+		project_root=/output_location/${project_name}
+		index_file=${project_root}/index_tab.txt
+		mkdir -p ${project_root}/cor/
+		Rscript /resources/run.R generate_correlation ${project_root} ${sample_index} ${index_file}
+	fi
+fi
+
+
+if [ $step_to_run = "step5" ]
+then
+	project_name=$2
+	sample_index=$3
+	if [[ $project_name != "" && $sample_index != "" ]]
+	then
+		gender_file=$4
+		batch_size=$5
+		if [[ $gender_file != "" && $batch_size != "" ]]
+		then
+			project_root=/output_location/${project_name}
+			index_file=${project_root}/index_tab.txt
+			mkdir -p ${project_root}/logr/
+			
+			Rscript /resources/run.R get_references ${project_root} ${sample_index} ${index_file} ${gender_file} ${batch_size}
+		fi
+	fi
+fi
+
+
+if [ $step_to_run = "step6" ]
+then
+	project_name=$2
+	sample_index=$3
+	if [[ $project_name != "" && $sample_index != "" ]]
+	then
+		project_root=/output_location/${project_name}
+		mkdir -p ${project_root}/rbin/
+		Rscript /resources/run.R processLogRtoBin ${project_root} ${sample_index}
+	fi
+fi
+
+
+if [ $step_to_run = "step7" ]
+then
+	project_name=$2
+	sample_index=$3
+	if [[ $project_name != "" && $sample_index != "" ]]
+	then
+		gender_file=$4
+		batch_size=$5
+		if [[ $gender_file != "" && $batch_size != "" ]]
+		then
+			project_root=/output_location/${project_name}
+			index_file=${project_root}/index_tab.txt
+			cov_file=/resources/txt_covered_all_coverage.txt 
+			output_path=${project_root}/cnv_calls
+			mkdir -p ${project_root}/cnv_calls
+
+			Rscript /resources/run.R run_hmm_rbin ${project_root} ${sample_index} ${index_file} ${cov_file} ${gender_file} ${output_path} ${batch_size}
+		fi
+	fi
+fi
+
