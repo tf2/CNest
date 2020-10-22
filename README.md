@@ -6,7 +6,7 @@
     <img src="src/fluff/cnv_logo.png" alt="Logo" width="300" height="200">
   </a>
 
-  <h3 align="center">CNest - the copy number estimator</h3>
+  <h3 align="center">CNest - The Copy Number Estimator</h3>
 
   <p align="center">
     Docker Implementation for CNest - Detection and Genome Wide Association Testing 
@@ -78,11 +78,6 @@ Use this space to show useful examples of how a project can be used. Additional 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
 
-<!-- CONTRIBUTING -->
-## Contributing
-
-
-
 <!-- LICENSE -->
 ## License
 
@@ -103,8 +98,6 @@ Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 ## Acknowledgements
 * Ewan Birney - [@ewanbirney](https://twitter.com/ewanbirney)
 * Shimin Shuai
-* []()
-* []()
 
 
 
