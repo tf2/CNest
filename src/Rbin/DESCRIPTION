@@ -1,0 +1,12 @@
+Package: Rbin
+Type: Package
+Title: Binary File Access Methods
+Version: 1.0
+Date: 2011-09-010
+Author: Tomas W Fitzgerald, Kate I Morley
+Maintainer: <tf2@sanger.ac.uk>
+Depends: ViteRbi, mixtools
+Description: Super Fast File Indexing and Access 
+License: Artistic
+NeedsCompilation: yes
+Packaged: 2020-10-22 21:24:51 UTC; tomas
