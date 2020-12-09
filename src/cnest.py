@@ -1,0 +1,95 @@
+#!/usr/bin/env python3.8
+
+import argparse
+import os
+import subprocess
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
+                    format='%(asctime)s | %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %H:%M:%S')
+# create logger
+logger = logging.getLogger('CNest')
+
+def get_args():
+    parser = argparse.ArgumentParser(description='CNest wrapper')
+    subparsers = parser.add_subparsers(help='Steps of CNest', dest='step')
+    # step 1
+    parser_1 = subparsers.add_parser('step1', help='Create project directory')
+    parser_1.add_argument('--project', dest='project', required=True, type=str, help='project name')
+    parser_1.add_argument('--index', dest='index_file', required=True, type=str, help='input index file name')
+    # step 2
+    parser_2 = subparsers.add_parser('step2', help='BAM/CRAM to binary')
+    parser_2.add_argument('--project', dest='project', required=True, type=str, help='project name')
+    parser_2.add_argument('--sample', dest='sample_id', required=True, type=str, help='sample name')
+    parser_2.add_argument('--input', dest='input_file', required=True, type=str, help='input BAM/CRAM file name')
+    parser_2.add_argument('--ref', type=str, default=None, help='Reference genome path [only for CRAM]')
+    parser_2.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug msgs.')
+    # step 3
+    parser_3 = subparsers.add_parser('step3', help='Gender QC')
+    parser_3.add_argument('--project', dest='project', required=True, type=str, help='project name')
+    args = parser.parse_args()
+    return args
+
+def step1(project):
+    # make project (sub-)directories if not existed
+    dirs = ['/output_location/' + project, '/output_location/' + project + '/txt',
+    '/output_location/' + project + '/bin', '/output_location/' + project + '/tmp']
+    for mydir in dirs:
+        if not os.path.exists(mydir):
+            os.mkdir(mydir)
+
+
+def step2(ref, project, sample_id, input_file):
+    """
+    	project_root=/output_location/${project_name}
+		echo $project_name $input_file_name $sample_id
+		/software/applications/ngscnv/ngs ${project_root} bam-to-rd /input_location/$input_file_name $sample_id
+		/software/applications/ngscnv/ngs ${project_root} rd-dump $sample_id > ${project_root}/txt/$sample_id
+		Rscript /resources/run.R processtobin ${project_root} $sample_id
+		rm ${project_root}/$sample_id
+		rm ${project_root}/txt/$sample_id
+    """
+    # For CRAM, check ref and set $REF_PATH to ref
+    if ref is not None:
+        logger.info('CRAM reference path found: ' + ref)
+        os.environ["REF_PATH"] = ref
+    project_root = '/output_location/' + project
+    cmd1 = ['/software/applications/ngscnv/ngs', project_root, 'bam-to-rd', input_file, sample_id]
+    cmd2 = ['/software/applications/ngscnv/ngs', project_root, 'rd-dump', sample_id]
+    cmd3 = ['Rscript', '/resources/run.R', 'processtobin', project_root, sample_id]
+    logger.debug('CMD=' + " ".join(cmd1))
+    process1 = subprocess.run(cmd1, capture_output=True)
+    if process1.returncode == 0:
+        logger.info('bam-to-rd done.')
+        logger.debug('CMD=' + " ".join(cmd2))
+        outpath = os.path.join(project_root, 'txt', sample_id)
+        logger.debug('OUT=' + outpath)
+        with open(outpath, 'w') as f:
+            process2 = subprocess.run(cmd2, stdout=f)
+    if process2.returncode == 0:
+        logger.info('rd-dump done.')
+        logger.debug('CMD=' + " ".join(cmd3))
+        process3 = subprocess.run(cmd3, capture_output=True)
+    if process3.returncode == 0:
+        logger.info('processtobin done.')
+    # clean temp files
+    os.remove(os.path.join(project_root, sample_id))
+    os.remove(os.path.join(project_root, 'txt', sample_id))
+    logger.info('Step 2 done!')
+
+
+if __name__ == '__main__':
+    args = get_args()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    if args.step == 'step1':
+        # step 1: make index and index_tab.txt
+        step1(args.project)
+    elif args.step == 'step2':
+        # step 2
+        step2(args.ref, args.project, args.sample_id, args.input_file)
+    elif args.step == 'step3':
+        # step 3
+        pass
