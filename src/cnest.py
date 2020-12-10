@@ -5,11 +5,11 @@ import os
 import subprocess
 import logging
 import sys
+import shutil
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format='%(asctime)s | %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S')
-# create logger
 logger = logging.getLogger('CNest')
 
 def get_args():
@@ -24,7 +24,6 @@ def get_args():
     parser_2.add_argument('--project', dest='project', required=True, type=str, help='project name')
     parser_2.add_argument('--sample', dest='sample_id', required=True, type=str, help='sample name')
     parser_2.add_argument('--input', dest='input_file', required=True, type=str, help='input BAM/CRAM file name')
-    parser_2.add_argument('--ref', type=str, default=None, help='Reference genome path [only for CRAM]')
     parser_2.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug msgs.')
     # step 3
     parser_3 = subparsers.add_parser('step3', help='Gender QC')
@@ -32,16 +31,20 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def step1(project):
+
+def step1(project, index_file):
     # make project (sub-)directories if not existed
     dirs = ['/output_location/' + project, '/output_location/' + project + '/txt',
     '/output_location/' + project + '/bin', '/output_location/' + project + '/tmp']
     for mydir in dirs:
         if not os.path.exists(mydir):
             os.mkdir(mydir)
+    # cp index.txt to project directory
+    shutil.copy('/input_location/' + index_file, '/output_location/' + project + '/index.txt')
+    # make index_tab.txt
 
 
-def step2(ref, project, sample_id, input_file):
+def step2(project, sample_id, input_file):
     """
     	project_root=/output_location/${project_name}
 		echo $project_name $input_file_name $sample_id
@@ -51,12 +54,8 @@ def step2(ref, project, sample_id, input_file):
 		rm ${project_root}/$sample_id
 		rm ${project_root}/txt/$sample_id
     """
-    # For CRAM, check ref and set $REF_PATH to ref
-    if ref is not None:
-        logger.info('CRAM reference path found: ' + ref)
-        os.environ["REF_PATH"] = ref
     project_root = '/output_location/' + project
-    cmd1 = ['/software/applications/ngscnv/ngs', project_root, 'bam-to-rd', input_file, sample_id]
+    cmd1 = ['/software/applications/ngscnv/ngs', project_root, 'bam-to-rd', '/input_location/' + input_file, sample_id]
     cmd2 = ['/software/applications/ngscnv/ngs', project_root, 'rd-dump', sample_id]
     cmd3 = ['Rscript', '/resources/run.R', 'processtobin', project_root, sample_id]
     logger.debug('CMD=' + " ".join(cmd1))
@@ -80,16 +79,34 @@ def step2(ref, project, sample_id, input_file):
     logger.info('Step 2 done!')
 
 
+def step3(project):
+    """
+    	project_root=/output_location/${project_name}
+		index_file=${project_root}/index_tab.txt
+		qc_file=${project_root}/gender_qc.txt
+		gender_file=${project_root}/gender_classification.txt
+		Rscript /resources/run.R classify_gender ${project_root} ${index_file} ${qc_file} ${gender_file}
+    """
+    project_root = '/output_location/' + project
+    index_file = project_root + '/index_tab.txt'
+    qc_file = project_root + '/gender_qc.txt'
+    gender_file = project_root + '/gender_classification.txt'
+    cmd = ['Rscript', '/resources/run.R', 'classify_gender', project_root, index_file, qc_file, gender_file]
+    process = subprocess.run(cmd, capture_output=True)
+    if process.returncode == 0:
+        logger.info('classify_gender done.')
+
+
 if __name__ == '__main__':
     args = get_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     if args.step == 'step1':
-        # step 1: make index and index_tab.txt
-        step1(args.project)
+        # step 1
+        step1(args.project, args.index_file)
     elif args.step == 'step2':
         # step 2
-        step2(args.ref, args.project, args.sample_id, args.input_file)
+        step2(args.project, args.sample_id, args.input_file)
     elif args.step == 'step3':
         # step 3
-        pass
+        step3(args.project)

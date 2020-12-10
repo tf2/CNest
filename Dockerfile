@@ -99,6 +99,9 @@ RUN rm -rf /$CNV_APP /Rbin_1.0.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /ht
 RUN mkdir -p /resources
 RUN mkdir -p /input_location
 RUN mkdir -p /output_location
+RUN mkdir -p /ref
+ENV REF_PATH=/ref/%2s/%2s/%s
+
 COPY src/run /resources
 COPY src/run.R /resources
 COPY src/cnest.py /resources
