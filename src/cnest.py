@@ -18,30 +18,46 @@ def get_args():
     # step 1
     parser_1 = subparsers.add_parser('step1', help='Create project directory')
     parser_1.add_argument('--project', dest='project', required=True, type=str, help='project name')
-    parser_1.add_argument('--index', dest='index_file', required=True, type=str, help='input index file name')
+    parser_1.add_argument('--bed', dest='bed_file', required=True, type=str, help='input sorted BED3 file name')
+    parser_1.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug messages')
     # step 2
     parser_2 = subparsers.add_parser('step2', help='BAM/CRAM to binary')
     parser_2.add_argument('--project', dest='project', required=True, type=str, help='project name')
     parser_2.add_argument('--sample', dest='sample_id', required=True, type=str, help='sample name')
     parser_2.add_argument('--input', dest='input_file', required=True, type=str, help='input BAM/CRAM file name')
-    parser_2.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug msgs.')
+    parser_2.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug messages')
     # step 3
     parser_3 = subparsers.add_parser('step3', help='Gender QC')
     parser_3.add_argument('--project', dest='project', required=True, type=str, help='project name')
+    parser_3.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug messages')
     args = parser.parse_args()
     return args
 
 
-def step1(project, index_file):
+def step1(project, bed_file):
+    accepted_chr = [str(i) for i in range(1,23)] + ['X', 'Y']
     # make project (sub-)directories if not existed
-    dirs = ['/output_location/' + project, '/output_location/' + project + '/txt',
-    '/output_location/' + project + '/bin', '/output_location/' + project + '/tmp']
+    dirs = [f'/output_location/{project}', f'/output_location/{project}/txt',
+    f'/output_location/{project}/bin', f'/output_location/{project}/tmp']
     for mydir in dirs:
         if not os.path.exists(mydir):
             os.mkdir(mydir)
-    # cp index.txt to project directory
-    shutil.copy('/input_location/' + index_file, '/output_location/' + project + '/index.txt')
-    # make index_tab.txt
+    bed_path = f'/input_location/{bed_file}'
+    index_path = f'/output_location/{project}/index.txt'
+    index_tab_path = f'/output_location/{project}/index_tab.txt'
+    with open(bed_path) as fin, open(index_path, 'w') as fix, open(index_tab_path, 'w') as ftab:
+        for line in fin:
+            elements = line.split('\t')
+            # index.txt uses the same chrom names as BED (BAM/CRAM)
+            # index_tab.txt uses 1-22, 23 for X and 24 for Y
+            chrom = elements[0].replace('chr', '')
+            assert chrom in accepted_chr, f'Only autosomes and X/Y are allowed. Your chromosome is {chrom}'
+            if chrom == 'X':
+                chrom = '23'
+            elif chrom == 'Y':
+                chrom = '24'
+            fix.write(f'{elements[0]}:{elements[1]}-{elements[2]}')
+            ftab.write(f'{chrom}\t{elements[1]}\t{elements[2]}')
 
 
 def step2(project, sample_id, input_file):
@@ -103,7 +119,7 @@ if __name__ == '__main__':
         logger.setLevel(logging.DEBUG)
     if args.step == 'step1':
         # step 1
-        step1(args.project, args.index_file)
+        step1(args.project, args.bed_file)
     elif args.step == 'step2':
         # step 2
         step2(args.project, args.sample_id, args.input_file)

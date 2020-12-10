@@ -105,7 +105,9 @@ ENV REF_PATH=/ref/%2s/%2s/%s
 COPY src/run /resources
 COPY src/run.R /resources
 COPY src/cnest.py /resources
-RUN chmod u+x /resources/cnest.py
+RUN chmod +x /resources/cnest.py
+
+ENTRYPOINT ["python3.8", "/resources/cnest.py"]
 
 ########################################################################
 # Run Notes:
