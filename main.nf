@@ -23,7 +23,6 @@ def helpMessage() {
 if (params.index) ch_index = Channel.value(file(params.index))
 
 // Re-usable process skeleton that performs a simple operation, listing files
-// nextflow run main.nf --project ukb
 process step1 {
   tag "${index}"
   echo true
@@ -63,7 +62,8 @@ process step2 {
 
   script:
   """
-    ls -alL ukb
+    mv ./${ref} /ref/
+    cnest.py step2 -project ${params.project} --sample ${params.sample} --input ${bam}
   """
 }
 
@@ -78,5 +78,5 @@ process step2 {
 // docker run -v "${input_path}:/input_location" -v "${output_path}/output_location" -it --rm smshuai/cnest:dev step1 -project ukbb_wes --sample 'A' --input 'a.bam'
 
 // # CRAM (Need to mount ref path)
-// docker run -v "${input_path}:/input_location" -v "${output_path}/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step1 -project ukbb_wes --sample 'A' --input 'a.bam'
+// docker run -v "${input_path}:/input_location" -v "${output_path}/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step2 -project ukbb_wes --sample 'A' --input 'a.bam'
 // ```

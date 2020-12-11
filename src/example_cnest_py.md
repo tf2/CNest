@@ -35,14 +35,14 @@ docker run -it --rm smshuai/cnest:dev step2 -h
 
 Step1
 ```bash
-docker run -v "${index_path}:/input_location" -v "${output_path}/output_location" -it --rm smshuai/cnest:dev step1 --project ukbb_wes --index index.txt
+docker run -v "${index_path}:/input_location" -v "${output_path}:/output_location" -it --rm smshuai/cnest:dev step1 --project ukbb_wes --bed index.bed
 ```
 
 Step2
 ```bash
 # BAM
-docker run -v "${input_path}:/input_location" -v "${output_path}/output_location" -it --rm smshuai/cnest:dev step1 -project ukbb_wes --sample 'A' --input 'a.bam'
+docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -it --rm smshuai/cnest:dev step2 --project ukbb_wes --sample 'A' --input 'a.bam'
 
 # CRAM (Need to mount ref path)
-docker run -v "${input_path}:/input_location" -v "${output_path}/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step1 -project ukbb_wes --sample 'A' --input 'a.bam'
+docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step2 --project ukbb_wes --sample 'A' --input 'a.bam'
 ```

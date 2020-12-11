@@ -70,6 +70,7 @@ def step2(project, sample_id, input_file):
 		rm ${project_root}/$sample_id
 		rm ${project_root}/txt/$sample_id
     """
+    logger.info('Start step2')
     project_root = '/output_location/' + project
     cmd1 = ['/software/applications/ngscnv/ngs', project_root, 'bam-to-rd', '/input_location/' + input_file, sample_id]
     cmd2 = ['/software/applications/ngscnv/ngs', project_root, 'rd-dump', sample_id]
