@@ -44,5 +44,5 @@ Step2
 docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -it --rm smshuai/cnest:dev step2 --project ukbb_wes --sample 'A' --input 'a.bam'
 
 # CRAM (Need to mount ref path)
-docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step2 --project ukbb_wes --sample 'A' --input 'a.bam'
+docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step2 --eproject ukbb_wes --sample 'A' --input 'a.bam'
 ```

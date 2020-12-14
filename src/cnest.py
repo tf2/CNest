@@ -84,6 +84,8 @@ def step2(project, sample_id, input_file):
         logger.debug('OUT=' + outpath)
         with open(outpath, 'w') as f:
             process2 = subprocess.run(cmd2, stdout=f)
+    else:
+        logger.error(f'bam-to-rd failed with exit code {process1.returncode}.\n{process1.stderr}')
     if process2.returncode == 0:
         logger.info('rd-dump done.')
         logger.debug('CMD=' + " ".join(cmd3))
