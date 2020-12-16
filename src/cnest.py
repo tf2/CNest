@@ -34,17 +34,16 @@ def get_args():
     return args
 
 
-def step1(project, bed_file):
+def step1(project, bed_path):
     accepted_chr = [str(i) for i in range(1,23)] + ['X', 'Y']
     # make project (sub-)directories if not existed
-    dirs = [f'/output_location/{project}', f'/output_location/{project}/txt',
-    f'/output_location/{project}/bin', f'/output_location/{project}/tmp']
+    dirs = [f'{project}', f'{project}/txt',
+    f'{project}/bin', f'{project}/tmp']
     for mydir in dirs:
         if not os.path.exists(mydir):
             os.mkdir(mydir)
-    bed_path = f'/input_location/{bed_file}'
-    index_path = f'/output_location/{project}/index.txt'
-    index_tab_path = f'/output_location/{project}/index_tab.txt'
+    index_path = f'{project}/index.txt'
+    index_tab_path = f'{project}/index_tab.txt'
     with open(bed_path) as fin, open(index_path, 'w') as fix, open(index_tab_path, 'w') as ftab:
         for line in fin:
             elements = line.split('\t')
@@ -60,7 +59,7 @@ def step1(project, bed_file):
             ftab.write(f'{chrom}\t{elements[1]}\t{elements[2]}')
 
 
-def step2(project, sample_id, input_file):
+def step2(project_root, sample_id, input_file):
     """
     	project_root=/output_location/${project_name}
 		echo $project_name $input_file_name $sample_id
@@ -69,10 +68,13 @@ def step2(project, sample_id, input_file):
 		Rscript /resources/run.R processtobin ${project_root} $sample_id
 		rm ${project_root}/$sample_id
 		rm ${project_root}/txt/$sample_id
+
+        TODO:
+        1. Add BAM/CRAM index file check
+        2. 
     """
     logger.info('Start step2')
-    project_root = '/output_location/' + project
-    cmd1 = ['/software/applications/ngscnv/ngs', project_root, 'bam-to-rd', '/input_location/' + input_file, sample_id]
+    cmd1 = ['/software/applications/ngscnv/ngs', project_root, 'bam-to-rd', input_file, sample_id]
     cmd2 = ['/software/applications/ngscnv/ngs', project_root, 'rd-dump', sample_id]
     cmd3 = ['Rscript', '/resources/run.R', 'processtobin', project_root, sample_id]
     logger.debug('CMD=' + " ".join(cmd1))

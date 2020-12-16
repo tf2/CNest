@@ -1,48 +1,47 @@
 # Using Singularity
-Getting help
+## Getting help
 ```bash
-# Pull from docker hub (dev version)
-singularity pull -F docker://smshuai/cnest:dev
-# Overall
-singularity run /hps/nobackup2/singularity/shimin/cnest-dev.simg -h
-# For a given step
-singularity run /hps/nobackup2/singularity/shimin/cnest-dev.simg step2 -h
+# Tested on singularity version 3.7.0-1.el7
+# Show help of available commands
+singularity run docker://smshuai/cnest:dev2 -h
+# Show help for a given step
+singularity run docker://smshuai/cnest:dev2 step2 -h
 ```
 
-Step1
+## Run Step1
 ```bash
-singularity run -B "/hps/research1/birney/users/shimin/CNest/index_files:/input_location,/hps/research1/birney/users/shimin/CNest/benchmark:/output_location" /hps/nobackup2/singularity/shimin/cnest-dev.simg step1 --project ukbb_wes --bed ukbb_wes_index.bed
+singularity run -B "${index_path}:/input,${output_path}:/output" --pwd /output/ docker://smshuai/cnest:dev2 step1 --project 'test_proj' --bed '/input/test.bed'
 ```
 
-Step2
+## Run Step2
 ```bash
 # BAM
-singularity run -B "${input_path}:/input_location,${output_path}/output_location" /hps/nobackup2/singularity/shimin/cnest-dev.simg python3.8 /resources/cnest.py step2 --project ukbb_wes --sample 'A' --input 'a.bam'
+singularity run -B "${input_path}:/input,${output_path}:/output" --pwd /output/ docker://smshuai/cnest:dev2 step2 --project 'test_proj' --sample 'test_bam' --input '/input/test.bam'
 
 # CRAM (Need to mount ref path)
-singularity run -B "${input_path}:/input_location,${output_path}/output_location,${ref_path}:/ref" /hps/nobackup2/singularity/shimin/cnest-dev.simg python3.8 /resources/cnest.py step2 --project ukbb_wes --sample 'A' --input 'a.cram'
+singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref" --pwd /output/ docker://smshuai/cnest:dev2 step2 --project 'test_proj' --sample 'test_cram' --input '/input/test.cram'
 ```
 
-
 # Using Docker
-Getting help
+## Getting help
 ```bash
-# Overall
+# Show help of available commands
 docker run -it --rm smshuai/cnest:dev -h
-# For a given step
+# Show help for a given step
 docker run -it --rm smshuai/cnest:dev step2 -h
 ```
 
-Step1
+## Run Step1
+Note: `index.bed` must have the same chromosome names as the BAM/CRAM file.
 ```bash
-docker run -v "${index_path}:/input_location" -v "${output_path}:/output_location" -it --rm smshuai/cnest:dev step1 --project ukbb_wes --bed index.bed
+docker run -v "${index_path}:/input" -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 step1 --project test_proj --bed /wkdir/index.bed
 ```
 
-Step2
+## Run Step2
 ```bash
 # BAM
-docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -it --rm smshuai/cnest:dev step2 --project ukbb_wes --sample 'A' --input 'a.bam'
+docker run -v "${input_path}:/input" -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 step2 --project test_proj --sample 'test_bam' --input '/input/test.bam'
 
 # CRAM (Need to mount ref path)
-docker run -v "${input_path}:/input_location" -v "${output_path}:/output_location" -v "${ref_path}:/ref" -it --rm smshuai/cnest:dev step2 --eproject ukbb_wes --sample 'A' --input 'a.bam'
+docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}:/ref" -w "/output" -it --rm smshuai/cnest:dev2 step2 --project test_proj --sample 'test_cram' --input '/input/test.cram'
 ```
