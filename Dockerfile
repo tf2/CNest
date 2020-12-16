@@ -5,18 +5,19 @@
 # Email: tomas@ebi.ac.uk
 ########################################################################
 
-FROM alpine
-FROM rstudio/r-base:3.6-xenial
+FROM rstudio/r-base:3.6-bionic
 
 ########################################################################
-# Install samtools, bcftools and dependancies
+# Install samtools, bcftools, python3 and dependancies
 ########################################################################
 ENV APP_NAME=samtools
 ENV VERSION=1.9
 ENV APPS=/software/applications
 ENV DEST=$APPS/$APP_NAME/
-ENV PATH=$APPS/$APP_NAME/$VERSION/bin:$APPS/bcftools/$VERSION/bin:$PATH
+ENV PATH=/resources/:$APPS/$APP_NAME/$VERSION/bin:$APPS/bcftools/$VERSION/bin:$PATH
+ENV DEBIAN_FRONTEND=noninteractive
 
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential python3.8
 RUN apt-get update && apt-get install -y ncurses-dev && \
 											apt-get install -y bzip2 && \
 											apt-get install -y xz-utils && \ 
@@ -98,12 +99,15 @@ RUN rm -rf /$CNV_APP /Rbin_1.0.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /ht
 RUN mkdir -p /resources
 RUN mkdir -p /input_location
 RUN mkdir -p /output_location
+RUN mkdir -p /ref
+ENV REF_PATH=/ref/%2s/%2s/%s
+
 COPY src/run /resources
 COPY src/run.R /resources
-COPY src/index.txt /resources
-COPY src/index_tab.txt /resources
-COPY src/txt_covered_all_coverage.txt /resources
-COPY src/QC_gender_example.txt /resources
+COPY src/cnest.py /resources
+RUN chmod +x /resources/cnest.py
+
+ENTRYPOINT ["python3.8", "/resources/cnest.py"]
 
 ########################################################################
 # Run Notes:
