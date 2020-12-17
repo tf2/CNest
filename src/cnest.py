@@ -36,21 +36,20 @@ def get_args():
     return args
 
 
-def step1(project, bed_path):
+def step1(project, bed_path, debug):
     accepted_chr = [str(i) for i in range(1,23)] + ['X', 'Y']
     # make project (sub-)directories if not existed
-    dirs = [f'{project}', f'{project}/txt',
-    f'{project}/bin', f'{project}/tmp']
+    dirs = [f'{project}', f'{project}/txt', f'{project}/bin', f'{project}/tmp']
     for mydir in dirs:
         if not os.path.exists(mydir):
             os.mkdir(mydir)
     # Three index files to be added in to the project directory
     index_bed_path = f'{project}/index.bed'
     index_path = f'{project}/index.txt'
-    index_tab_path = f'{project}/index_tab.txt'
+    index_tmp_path = f'{project}/tmp/index_tab.txt'  # unsorted temp file
     # Copy BED into index.bed
     shutil.copy(src=bed_path, dst=index_bed_path, follow_symlinks=True)
-    with open(index_bed_path) as fin, open(index_path, 'w') as fix, open(index_tab_path, 'w') as ftab:
+    with open(index_bed_path) as fin, open(index_path, 'w') as fix, open(index_tmp_path, 'w') as ftab:
         for line in fin:
             elements = line.split('\t')
             # index.txt uses the same chrom names as BED (BAM/CRAM)
@@ -63,7 +62,17 @@ def step1(project, bed_path):
                 chrom = '24'
             fix.write(f'{elements[0]}:{elements[1]}-{elements[2]}')
             ftab.write(f'{chrom}\t{elements[1]}\t{elements[2]}')
-
+    # Sort the index_tab.txt
+    index_tab_path = f'{project}/index_tab.txt'
+    with open(index_tab_path, 'w') as ftab:
+        cmd = ['sort', '-n', '-k1,1', '-k2,2', '-k3,3', index_tmp_path]
+        logger.debug('CMD=' + " ".join(cmd))
+        subprocess.run(cmd, stdout=ftab, check=True)
+    # clean temp files
+    if not debug:
+        os.remove(index_tmp_path)
+    logger.info('Step1 done!')
+    
 
 def step2(project_root, sample_id, input_file, debug):
     """
@@ -131,8 +140,8 @@ def step2_fast(project, sample_id, input_file, fasta_file, debug):
     logger.debug('CMD=' + " ".join(cmd1))
     process1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE, bufsize=64, text=True)
     it1 = iter(process1.stdout.readline, '')
-    tmp_path = f'{project}/tmp/{sample_id}'
-    with open(tmp_path, 'w') as ftmp:
+    tmp_path1 = f'{project}/tmp/{sample_id}.unsorted'
+    with open(tmp_path1, 'w') as ftmp:
         for line in it1:
             elements = line.strip().split('\t')
             # Chromosome name no chr
@@ -143,12 +152,20 @@ def step2_fast(project, sample_id, input_file, fasta_file, debug):
             elif chrom == 'Y':
                 chrom = '24'
             ftmp.write(f'{chrom}\t{elements[1]}\t{elements[2]}\t{elements[3]}\t1\t1\t1\n')
+    # Sort the temp file
+    tmp_path2 = f'{project}/tmp/{sample_id}'
+    with open(tmp_path2, 'w') as ftmp:
+        cmd2 = ['sort', '-n', '-k1,1', '-k2,2', '-k3,3', tmp_path1]
+        logger.debug('CMD=' + " ".join(cmd2))
+        subprocess.run(cmd2, stdout=ftmp, check=True)
     # Convert table to binary with Rbin
-    cmd2 = ['Rscript', '/resources/run.R', 'processtobin_fast', project, sample_id]
-    subprocess.run(cmd2, capture_output=True, check=True)
+    cmd3 = ['Rscript', '/resources/run.R', 'processtobin_fast', project, sample_id]
+    logger.debug('CMD=' + " ".join(cmd3))
+    subprocess.run(cmd3, capture_output=True, check=True)
     # clean temp files
     if not debug:
-        os.remove(tmp_path)
+        os.remove(tmp_path1)
+        os.remove(tmp_path2)
     logger.info('Step2-fast done')
 
 
@@ -178,7 +195,7 @@ if __name__ == '__main__':
         logger.setLevel(logging.DEBUG)
     if args.step == 'step1':
         # step 1
-        step1(args.project, args.bed_file)
+        step1(args.project, args.bed_file, args.debug)
     elif args.step == 'step2':
         # step 2
         if args.fast_mode:

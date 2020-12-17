@@ -1,7 +1,8 @@
 # Using Singularity
 ## Getting help
 ```bash
-# Tested on singularity version 3.7.0-1.el7
+# Tested on singularity version 3.5.0 and 3.7.0-1.el7
+singularity pull docker://smshuai/cnest:dev2
 # Show help of available commands
 singularity run docker://smshuai/cnest:dev2 -h
 # Show help for a given step
@@ -10,16 +11,24 @@ singularity run docker://smshuai/cnest:dev2 step2 -h
 
 ## Run Step1
 ```bash
-singularity run -B "${index_path}:/input,${output_path}:/output" --pwd /output/ docker://smshuai/cnest:dev2 step1 --project 'test_proj' --bed '/input/test.bed'
+singularity run -B "${index_path}:/input,${output_path}:/output" --pwd "/output/" docker://smshuai/cnest:dev2 step1 --project $project_name --bed "/input/$index_bed"
 ```
 
 ## Run Step2
 ```bash
 # BAM
-singularity run -B "${input_path}:/input,${output_path}:/output" --pwd /output/ docker://smshuai/cnest:dev2 step2 --project 'test_proj' --sample 'test_bam' --input '/input/test.bam'
+singularity run -B "${input_path}:/input,${output_path}:/output" --pwd /output/ docker://smshuai/cnest:dev step2 --project 'test_proj' --sample 'test_bam' --input '/input/test.bam'
 
 # CRAM (Need to mount ref path)
-singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref" --pwd /output/ docker://smshuai/cnest:dev2 step2 --project 'test_proj' --sample 'test_cram' --input '/input/test.cram'
+singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref" --pwd /output/ docker://smshuai/cnest:dev step2 --project $project_name --sample $sample_name --input "/input/$cram_name"
+
+# CRAM (fast mode)
+singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref" --pwd /output/ docker://smshuai/cnest:dev step2 --project $project_name --sample $sample_name --input "/input/$cram_name" --fasta "/ref/$fasta" --fast
+```
+
+## Run Step3
+```bash
+singularity run -B "${output_path}:/output" --pwd "/output/" docker://smshuai/cnest:dev step3 --project $project_name
 ```
 
 # Using Docker
