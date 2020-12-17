@@ -8,12 +8,12 @@
 ########################################################################
 # Stage 1: Install hts-nim-tools with miniconda
 ########################################################################
-FROM continuumio/miniconda3 AS builder
+FROM continuumio/miniconda3:4.9.2-alpine AS builder
 
 RUN conda config --add channels defaults
 RUN conda config --add channels bioconda
 RUN conda config --add channels conda-forge
-RUN conda install -y hts-nim-tools
+RUN conda install -y hts-nim-tools=0.3.11-0
 RUN /opt/conda/bin/conda clean --yes --force-pkgs-dirs
 
 ########################################################################

@@ -136,7 +136,7 @@ def step2_fast(project, sample_id, input_file, fasta_file, debug):
         assert os.path.exists(f"{input_file}.crai"), f"{input_file}.crai not found."
     # Run hts_nim_tools to obtain read counts
     # Save the read count into temp file [chrom start end count depth extraCol1 extraCol2]
-    cmd1 = ['hts_nim_tools', 'count-reads', '-f', fasta_file, '-t', '1', f'{project}/index.bed', input_file]
+    cmd1 = ['hts_nim_tools', 'count-reads', '-f', fasta_file, '--threads', '1', '--mapq', '1', f'{project}/index.bed', input_file]
     logger.debug('CMD=' + " ".join(cmd1))
     process1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE, bufsize=64, text=True)
     it1 = iter(process1.stdout.readline, '')
