@@ -44,4 +44,7 @@ docker run -v "${input_path}:/input" -v "${output_path}:/output" -w "/output" -i
 
 # CRAM (Need to mount ref path)
 docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}:/ref" -w "/output" -it --rm smshuai/cnest:dev2 step2 --project test_proj --sample 'test_cram' --input '/input/test.cram'
+
+# CRAM fast mode
+docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}:/ref" -w "/output" -it --rm smshuai/cnest:dev2 --debug step2 --project test_proj --sample 'test_cram' --input '/input/test.cram' --fast --fasta '/ref/GCA_000001405.15_GRCh38_full_analysis_set.fna'
 ```

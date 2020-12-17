@@ -15,6 +15,15 @@ if(args[1] == "processtobin") {
 	print ("processtobin")
 }
 
+if(args[1] == "processtobin_fast") {
+	project_root = args[2]
+	sample_id = args[3]
+	tempfile= paste(project_root, "/tmp/", sample_id, sep="")
+	binfile= paste(project_root, "/bin/", sample_id, sep="")
+	processtobin_fast(tempfile, binfile)
+	print ("processtobin (fast mode)")
+}
+
 if(args[1] == "classify_gender") {
 	project_root = args[2]
 	index_file = args[3]
