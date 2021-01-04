@@ -1,5 +1,11 @@
 #!/usr/bin/env python3.8
 
+"""Command-line interface for CNest
+Author: Shimin Shuai (EMBL)
+Contact: shimin.shuai@embl.de
+Date: Jan 4, 2021
+"""
+
 import argparse
 import os
 import subprocess
@@ -20,7 +26,6 @@ def get_args():
     parser_1 = subparsers.add_parser('step1', help='Create project directory')
     parser_1.add_argument('--project', dest='project', required=True, type=str, help='Project name')
     parser_1.add_argument('--bed', dest='bed_file', required=True, type=str, help='Input sorted BED3 file name')
-    # parser_1.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug messages')
     # step 2
     parser_2 = subparsers.add_parser('step2', help='BAM/CRAM to binary')
     parser_2.add_argument('--project', dest='project', required=True, type=str, help='Poject name')
@@ -31,7 +36,14 @@ def get_args():
     # step 3
     parser_3 = subparsers.add_parser('step3', help='Gender QC')
     parser_3.add_argument('--project', dest='project', required=True, type=str, help='Project name')
-    # parser_3.add_argument('--debug', dest='debug', default=False, action='store_true', help='Show debug messages')
+    # step 4
+    parser_4 = subparsers.add_parser('step4', help='Sample Correlation')
+    parser_4.add_argument('--indextab', dest='index_tab', required=True, type=str, help='Index tab file from step1')
+    parser_4.add_argument('--bindir', dest='bin_dir', required=True, type=str, help='Directory of all bin files from step2')
+    parser_4.add_argument('--cordir', dest='cor_dir', required=True, type=str, help='Directory of output cor file')
+    parser_4.add_argument('--gender', dest='gender', type=int, help='Gender classification file from step3')
+    parser_4.add_argument('--sample', dest='sample_id', type=str, help='Sample name')
+    parser_4.add_argument('--splix', dest='sample_ix', type=int, help='Sample index (deprecated; --sample preferred)')
     args = parser.parse_args()
     return args
 
@@ -47,10 +59,9 @@ def step1(project, bed_path, debug):
     index_bed_path = f'{project}/index.bed'
     index_path = f'{project}/index.txt'
     index_tmp_path = f'{project}/tmp/index_tab.txt'  # unsorted temp file
-    # Copy BED into index.bed
-    shutil.copy(src=bed_path, dst=index_bed_path, follow_symlinks=True)
-    with open(index_bed_path) as fin, open(index_path, 'w') as fix, open(index_tmp_path, 'w') as ftab:
+    with open(bed_path) as fin, open(index_bed_path, 'w') as fbed, open(index_path, 'w') as fix, open(index_tmp_path, 'w') as ftab:
         for line in fin:
+            fbed.write(line)
             elements = line.split('\t')
             # index.txt uses the same chrom names as BED (BAM/CRAM)
             # index_tab.txt uses 1-22, 23 for X and 24 for Y
@@ -170,7 +181,7 @@ def step2_fast(project, sample_id, input_file, fasta_file, debug):
 
 
 def step3(project_root):
-    """
+    """Gender QC
     	project_root=/output_location/${project_name}
 		index_file=${project_root}/index_tab.txt
 		qc_file=${project_root}/gender_qc.txt
@@ -187,6 +198,21 @@ def step3(project_root):
         logger.info('classify_gender done.')
     else:
         logger.error(f'classify_gender failed with exit code {process.returncode}.\n{process.stderr}')
+
+
+def step4(project_root, index_tab):
+    """Sample correlation
+    	project_root=/output_location/${project_name}
+		index_file=${project_root}/index_tab.txt
+		mkdir -p ${project_root}/cor/
+		Rscript /resources/run.R generate_correlation ${project_root} ${sample_index} ${index_file}
+
+    Note:
+        The orginial function uses a [sample_index]. Here, we change this and use [sample_name] instead.
+        # updated version
+        Rscript /resources/run.R generate_correlation ${bin_dir} ${cor_dir} ${sample_name} ${index_tab}
+    """
+    pass
 
 
 if __name__ == '__main__':

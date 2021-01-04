@@ -35,18 +35,11 @@ if(args[1] == "classify_gender") {
 }
 
 if(args[1] == "generate_correlation") {
-	project_root = args[2]
-	sample_index = as.numeric(as.character(args[3]))
-	indexfile = args[4]
-	bin_dir = paste(project_root, "/bin", sep="")
-	cor_dir = paste(project_root, "/cor", sep="")
-	if(file.exists(paste(project_root,"/txt", sep=""))) {
-		system(paste("rm -r ", paste(project_root,"/txt", sep="")))
-	}
-	if(file.exists(paste(project_root,"/tmp", sep=""))) {
-		system(paste("rm -r ", paste(project_root,"/tmp", sep="")))
-	}
-	generate_correlation(bin_dir, cor_dir, sample_index, indexfile)
+	bin_dir = args[2]  # path to all bin files
+	cor_dir = args[3] # output cor dir
+	sample_name = args[4] # sample name 
+	index_file = args[5] # index_tab.txt path
+	generate_correlation(bin_dir, cor_dir, sample_name, index_file)
 	print ("generate_correlation")
 }
 
