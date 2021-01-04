@@ -44,47 +44,39 @@ if(args[1] == "generate_correlation") {
 }
 
 if(args[1] == "get_references") {
-	project_root = args[2]
-	sample_index = as.numeric(as.character(args[3]))
-	indexfile = args[4]
-	gender_file = args[5]
-	batchsize = as.numeric(as.character(args[6]))
-	bin_dir = paste(project_root, "/bin", sep="")
-	cor_dir = paste(project_root, "/cor", sep="")
-	outputdir = paste(project_root, "/logr", sep="")
-
-	get_references(sample_index, indexfile, gender_file, outputdir, cor_dir, bin_dir, batchsize)
+	# ['Rscript', '/resources/run.R', 'get_references', bin_dir, cor_dir, logr_dir, sample_name, index_tab, gender_file, batch_size]
+	bin_dir = args[2]
+	cor_dir = args[3]
+	logr_dir = args[4]
+	sample_name = args[5]
+	index_file = args[6]
+	gender_file = args[7]
+	batchsize = as.numeric(as.character(args[8]))
+	get_references(sample_name, index_file, gender_file, logr_dir, cor_dir, bin_dir, batchsize)
 	print ("get_references")
 }
 
 if(args[1] == "processLogRtoBin") {
-	project_root = args[2]
-	sample_index = as.numeric(as.character(args[3]))
-	logR_dir = paste(project_root, "/logr", sep="")
-	rbin = paste(project_root, "/rbin", sep="")
-	processLogRtoBin(logR_dir, rbin, sample_index)
+	# cmd6 = ['Rscript', '/resources/run.R', 'processLogRtoBin', logr_dir, rbin_dir, sample_name]
+	logr_dir = args[2]
+	rbin_dir = args[3]
+	sample_name = args[4]
+	processLogRtoBin(logr_dir, rbin_dir, sample_name)
 	print ("processLogRtoBin")
 }
 
 if(args[1] == "run_hmm_rbin") {
-	project_root = args[2]
-	sample_index = as.numeric(as.character(args[3]))
-	indexfile = args[4]
-	cov_file = args[5]
-	gender_file = args[6]
-	outpath = args[7]
-	batch_size = args[8]
-	rbin = paste(project_root, "/rbin", sep="")
-	cor_dir = paste(project_root, "/cor", sep="")
-	if(file.exists(paste(project_root,"/logr", sep=""))) {
-		system(paste("rm -r ", paste(project_root,"/logr", sep="")))
-	}
-	print(rbin)
-	print(sample_index)
-	run_hmm_rbin(rbin, sample_index, indexfile, cov_file, cor_dir, gender_file, outpath, batch_size)
+	#   Rscript /resources/run.R run_hmm_rbin ${bin_dir} ${cor_dir} ${cnv_dir} ${sample_name} \
+    #        ${index_tab} ${cov_file} ${gender_file} ${batch_size}
+	rbin_dir = args[2]
+	cor_dir = args[3]
+	cnv_dir = args[4]
+	sample_name = args[5]
+	index_file = args[6]
+	cov_file = args[7] # cov_file=/resources/txt_covered_all_coverage.txt 
+	gender_file = args[8]
+	batch_size = args[9]
+	print(sample_name)
+	run_hmm_rbin(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size)
 	print ("run_hmm_rbin")
 }
-
-
-
-

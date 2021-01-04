@@ -57,3 +57,19 @@ docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}
 # CRAM fast mode
 docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}:/ref" -w "/output" -it --rm smshuai/cnest:dev2 --debug step2 --project test_proj --sample 'test_cram' --input '/input/test.cram' --fast --fasta '/ref/GCA_000001405.15_GRCh38_full_analysis_set.fna'
 ```
+
+## Run Step3
+```bash
+docker run -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 step3 --project $project_name
+```
+
+## Run Step4
+```bash
+index_tab=$project_name/index_tab.txt
+bin_dir=$project_name/bin
+cor_dir=$project_name/cor
+logr_dir=$project_name/logr
+rbin_dir=$project_name/rbin
+gender_file=$project_name/gender_classification.txt
+docker run -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 step4 --indextab $index_tab --bindir $bin_dir --cordir $cor_dir --logrdir $logr_dir --rbindir $rbin_dir --sample $sample_name --gender $gender_file --batch 1000
+```

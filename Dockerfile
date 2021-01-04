@@ -112,15 +112,10 @@ RUN rm -rf /$CNV_APP /Rbin_1.1.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /ht
 #	- TODO: auto resource generation functionality 
 ########################################################################
 
-RUN mkdir -p /resources
-RUN mkdir -p /input
-RUN mkdir -p /output
-RUN mkdir -p /ref
+RUN mkdir -p /resources/ /input/ /output/ /ref/
 ENV REF_PATH=/ref/%2s/%2s/%s
 
-COPY src/run /resources
-COPY src/run.R /resources
-COPY src/cnest.py /resources
+COPY src/run src/run.R src/cnest.py /resources/
 RUN chmod +x /resources/cnest.py
 
 ENTRYPOINT ["python3.8", "/resources/cnest.py"]
