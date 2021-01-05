@@ -44,28 +44,56 @@ def get_args():
                           default=False, help='Reference FASTA for fast mode')
     # step 3
     parser_3 = subparsers.add_parser('step3', help='Gender QC')
-    parser_3.add_argument('--project', dest='project',
-                          required=True, type=str, help='Project name')
+    parser_3.add_argument('--indextab', dest='index_tab',
+                          required=True, type=str, help='Index tab file from step1')
+    parser_3.add_argument('--bindir', dest='bin_dir', required=True,
+                          type=str, help='Directory for all bin files from step2')
+    parser_3.add_argument('--qc', dest='qc_file',
+                          required=True, type=str, help='Gender QC file path [output]')
+    parser_3.add_argument('--gender', dest='gender_file', required=True,
+                          type=str, help='Gender classification file path [output]')
+    parser_3.add_argument('--cov', dest='cov_file', required=True,
+                          type=str, help='Coverage file path [output]')
     # step 4
-    parser_4 = subparsers.add_parser('step4', help='Sample Correlation')
+    parser_4 = subparsers.add_parser('step4', help='Sample Correlation & Rbin generation')
     parser_4.add_argument('--indextab', dest='index_tab',
                           required=True, type=str, help='Index tab file from step1')
     parser_4.add_argument('--bindir', dest='bin_dir', required=True,
                           type=str, help='Directory for all bin files from step2')
     parser_4.add_argument('--cordir', dest='cor_dir',
-                          required=True, type=str, help='Directory for cor file')
+                          required=True, type=str, help='Directory for cor file [output]')
     parser_4.add_argument('--logrdir', dest='logr_dir',
-                          required=True, type=str, help='Directory for logr file')
+                          required=True, type=str, help='Directory for logr file [output]')
     parser_4.add_argument('--rbindir', dest='rbin_dir',
-                          required=True, type=str, help='Directory for rbin file')
+                          required=True, type=str, help='Directory for rbin file [output]')
     parser_4.add_argument('--gender', dest='gender_file',
                           type=str, help='Gender classification file from step3')
     parser_4.add_argument('--sample', dest='sample_id',
                           type=str, help='Sample name')
     parser_4.add_argument('--splix', dest='sample_ix', type=int,
-                          help='Sample index (deprecated; --sample preferred)')
+                          help='Sample index (alternative to --sample; deprecated)')
     parser_4.add_argument('--batch', dest='batch_size',
-                          type=int, help='Batch size')
+                          type=int, help='Maximum number of samples used as references')
+    # step 5
+    parser_5 = subparsers.add_parser('step5', help='HMM Call')
+    parser_5.add_argument('--indextab', dest='index_tab',
+                          required=True, type=str, help='Index tab file from step1')
+    parser_5.add_argument('--cnvdir', dest='cnv_dir', required=True,
+                          type=str, help='Directory for CNV files [output]')
+    parser_5.add_argument('--cordir', dest='cor_dir',
+                          required=True, type=str, help='Directory for cor file from step4')
+    parser_5.add_argument('--rbindir', dest='rbin_dir',
+                          required=True, type=str, help='Directory for rbin file from step4')
+    parser_5.add_argument('--gender', dest='gender_file',
+                          type=str, help='Gender classification file from step3')
+    parser_5.add_argument('--cov', dest='cov_file',
+                          type=str, help='Coverage file from step3')
+    parser_5.add_argument('--sample', dest='sample_id',
+                          type=str, help='Sample name')
+    parser_5.add_argument('--splix', dest='sample_ix', type=int,
+                          help='Sample index (alternative to --sample; deprecated)')
+    parser_5.add_argument('--batch', dest='batch_size',
+                          type=int, help='Maximum number of samples used as references')                          
     args = parser.parse_args()
     return args
 
@@ -216,26 +244,40 @@ def step2_fast(project, sample_id, input_file, fasta_file, debug):
     logger.info('Step2-fast done')
 
 
-def step3(project_root):
-    """Gender QC
+def step3(bin_dir, index_tab, qc_file, gender_file, cov_file):
+    """Gender QC & Coverage Generation
+
+        # Original code
         project_root=/output_location/${project_name}
-                index_file=${project_root}/index_tab.txt
-                qc_file=${project_root}/gender_qc.txt
-                gender_file=${project_root}/gender_classification.txt
-                Rscript /resources/run.R classify_gender ${project_root} ${index_file} ${qc_file} ${gender_file}
+        index_file=${project_root}/index_tab.txt
+        qc_file=${project_root}/gender_qc.txt
+        gender_file=${project_root}/gender_classification.txt
+        Rscript /resources/run.R classify_gender ${project_root} ${index_file} ${qc_file} ${gender_file}
+
+    Note:
+        # Current code
+        Rscript /resources/run.R classify_gender ${bin_dir} ${index_tab} ${qc_file} ${gender_file}
+        Rscript /resources/run.R generate_coverage ${bin_dir} ${index_tab} ${cov_file}
     """
-    logger.info('Start step3')
-    index_file = project_root + '/index_tab.txt'
-    qc_file = project_root + '/gender_qc.txt'
-    gender_file = project_root + '/gender_classification.txt'
-    cmd = ['Rscript', '/resources/run.R', 'classify_gender',
-           project_root, index_file, qc_file, gender_file]
-    process = subprocess.run(cmd, capture_output=True)
+    logger.info('Starting step3')
+    cmd3_1 = ['Rscript', '/resources/run.R', 'classify_gender',
+           bin_dir, index_tab, qc_file, gender_file]
+    logger.debug('CMD | ' + " ".join(cmd3_1))
+    process = subprocess.run(cmd3_1, capture_output=True)
     if process.returncode == 0:
         logger.info('classify_gender done')
     else:
         logger.error(
             f'classify_gender failed with exit code {process.returncode}.\n{process.stderr}')
+    cmd3_2 = ['Rscript', '/resources/run.R', 'generate_coverage',
+           bin_dir, index_tab, cov_file]
+    logger.debug('CMD | ' + " ".join(cmd3_2))
+    try:
+        process = subprocess.run(cmd3_2, capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError as err:
+        logger.error(f'generate_coverage failed with exit code {err.returncode}.\n{err.stderr}')
+    logger.info('generate_coverage done')
+    logger.info('Step3 done')
 
 
 def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_file, batch_size, debug):
@@ -326,7 +368,7 @@ if __name__ == '__main__':
             step2(args.project, args.sample_id, args.input_file, args.debug)
     elif args.step == 'step3':
         # step 3
-        step3(args.project)
+        step3(args.bin_dir, args.index_tab, args.qc_file, args.gender_file, args.cov_file)
     elif args.step == 'step4':
         # step 4
         sample_id = ix2id(

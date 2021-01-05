@@ -60,7 +60,17 @@ docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}
 
 ## Run Step3
 ```bash
-docker run -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 step3 --project $project_name
+index_tab=$project_name/index_tab.txt
+bin_dir=$project_name/bin
+qc_file=$project_name/gender_qc.txt
+gender_file=$project_name/gender_classification.txt
+cov_file=$project_name/mean_coverage.txt
+docker run -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 --debug step3 \
+    --indextab $index_tab \
+    --bindir $bin_dir \
+    --qc $qc_file \
+    --gender $gender_file \
+    --cov $cov_file
 ```
 
 ## Run Step4
@@ -72,4 +82,8 @@ logr_dir=$project_name/logr
 rbin_dir=$project_name/rbin
 gender_file=$project_name/gender_classification.txt
 docker run -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 step4 --indextab $index_tab --bindir $bin_dir --cordir $cor_dir --logrdir $logr_dir --rbindir $rbin_dir --sample $sample_name --gender $gender_file --batch 1000
+```
+
+## Run Step5
+```bash
 ```

@@ -273,6 +273,33 @@ assign_gender <- function(qc_file, gender_file) {
 	write.table(gen_dat, file=gender_file, sep="\t", row.names=F, quote=F)
 }
 
+# This function generates a file with four columns: chrom, start, end, mean_coverage across all samples
+generate_coverage <- function(bin_dir, index_file, cov_file) {
+	get_sample <- function(bin_file, index) {
+	return(rr1= .C( "getValues",
+				"filename" = as.character(bin_file),
+		 		"start_position" = as.double(0), 
+		  		"number_row_to_read" =as.integer(nrow(index)),
+		   		"values" = as.double(1:nrow(index)),
+		   		"PACKAGE" = "Rbin"
+				)$values)
+	}
+	mean_norm <- function(bin_files, index) {
+		sum_cov = rep(0, nrow(index))
+		for(x in 1:length(bin_files)) {
+			cov = get_sample(bin_files[x], index)
+			sum_cov = sum_cov + cov
+		}
+	return(sum_cov/length(bin_files))
+	}
+	index = read.table(index_file)
+	bin_files = dir(bin_dir, full.names=TRUE)
+	mean_cov = mean_norm(bin_files, index)
+	cov_dat = data.frame(index, mean_cov)
+	write.table(cov_dat, file=cov_file, sep='\t', row.names=F, quote=F, col.names=F) 
+}
+
+
 generate_correlation <- function(bin_dir, cor_dir, sample_name, index_file) {
 	index = read.table(index_file)
 	filenames = dir(bin_dir, full.names=TRUE)
@@ -320,8 +347,50 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 	write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
 }
 
-get_references <- function(sample_name, index_file, gender_file, outputdir,
-							correlation_path, bin_dir, batch_size = 1000) {
+`get_ref_sample_names_by_type` <- function(sample_name, cor_dir, gender_file, batch_size = 5000, cor_cut = 0.9, type="mixed") {
+	## This function returns sample_names based on type (mixed, matched and mismatched)
+	## Will be used in get_references() and run_hmm_rbin()
+	
+	## Process sample correlation file
+	# V1 is sample name; V2 is cor coeff
+	d_corl = read.table(paste0(cor_dir, "/", sample_name))
+	# excluding self
+	dd = subset(d_corl, V1!=sample_name)
+	dd = dd[complete.cases(dd),] # na remove
+	dd = subset(dd, V2>cor_cut) # keep samples above cutoff
+	## Run EM
+	mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
+	comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
+	best_comp =  which.max(mixmdl$mu)
+	ref_samples = dd[comps==best_comp,]
+	if (type == 'mixed') {
+		# for highest correlated samples - excluding self
+		ref_samples = ref_samples[order(ref_samples[,2], decreasing=T),]
+		ref_sample_names  = as.character(ref_samples[1:(batch_size), 'V1'])
+	} else {
+		# gender-based references
+		gens = read.table(gender_file, header=T)
+		gens = gens[complete.cases(gens),] # Note that this is going to remove the low covergae data which did not get gender classification
+		this_gender = gens[gens[,1]==sample_name,]
+		# for gender matched highest corrleted reference - excluding self
+		if (type == 'matched') {
+			matched_ref_samples = dd[dd$V1 %in% gens[gens$gender==this_gender$gender,1],]
+			matched_ref_samples = matched_ref_samples[order(matched_ref_samples[,2], decreasing=T),]
+			ref_sample_names  = as.character(matched_ref_samples[1:(batch_size), 'V1'])
+		}
+		# for gender mismatched highest corrleted reference - excluding self
+		if (type == 'mismatched') {
+			mismatched_ref_samples = dd[dd$V1 %in% gens[gens$gender!=this_gender$gender,1],]
+			mismatched_ref_samples = mismatched_ref_samples[order(mismatched_ref_samples[,2], decreasing=T),]
+			ref_sample_names  = as.character(mismatched_ref_samples[1:(batch_size), 'V1'])
+		}
+	}
+	ref_sample_names = ref_sample_names[complete.cases(ref_sample_names)]
+	return(ref_sample_names)
+}
+
+get_references <- function(sample_name, index_file, gender_file, logr_dir,
+							cor_dir, bin_dir, batch_size = 1000) {
 	get_sample <- function(filename, index) {
 	return(rr1= .C( "getValues",
 				"filename" = as.character(filename),
@@ -349,63 +418,33 @@ get_references <- function(sample_name, index_file, gender_file, outputdir,
 		}
 	return(meds)
 	}
-	get_reference <- function(sample_name, sample_file, index, index_file, correlation_path, bin_dir, gender_file, batch_size = 5000, cor_cut = 0.9) {
-		# sample correlation file processing
-		# V1 is sample name; V2 is cor coeff
-		d_corl = read.table(paste0(correlation_path, "/", sample_name))
-		d_corl['full_path'] = paste0(bin_dir, '/', d_corl$V1)
-		# excluding self
-		d_corl = subset(d_corl, V1!=sample_name)
-		d = d_corl[complete.cases(d_corl),] # na remove
-		dd = d[d[,2]>cor_cut,] # keep samples above cutoff
 
-		mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
-		comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
-		best_comp =  which.max(mixmdl$mu)
-		ref_files = dd[comps==best_comp,]
-
-		# for highest correlated samples - excluding self
-		ref_files = ref_files[order(ref_files[,2], decreasing=T),]
-		ref_filenames  = as.character(ref_files[1:(batch_size), 'full_path'])
-		ref_filenames = ref_filenames[complete.cases(ref_filenames)]
-
-		# for gender matched highest crrleted reference - excluding self
-		gens = read.table(gender_file, header=T)
-		gens = gens[complete.cases(gens),] # Note that this is going to remove the low covergae data which did not get gender classification
-		this_gender = gens[gens[,1]==sample_name,]
-		matched_ref_files = dd[dd$V1 %in% gens[gens$gender==this_gender$gender,1],]
-		matched_ref_files = matched_ref_files[order(matched_ref_files[,2], decreasing=T),]
-		matched_ref_file_names  = as.character(matched_ref_files[1:(batch_size), 'full_path'])
-		matched_ref_file_names = matched_ref_file_names[complete.cases(matched_ref_file_names)]
-
-		# for gender mismatched highest crrleted reference - excluding self
-		mismatched_ref_files = dd[dd$V1 %in% gens[gens$gender!=this_gender$gender,1],]
-		mismatched_ref_files = mismatched_ref_files[order(mismatched_ref_files[,2], decreasing=T),]
-		mismatched_ref_files_names  = as.character(mismatched_ref_files[1:(batch_size), 'full_path'])
-		mismatched_ref_files_names = mismatched_ref_files_names[complete.cases(mismatched_ref_files_names)]
-
-		mean_cov = mean_norm(ref_filenames, index)
-		median_cov = med_norm(ref_filenames, index, index_file)
-		matched_mean_cov = mean_norm(matched_ref_file_names, index)
-		matched_med_cov = med_norm(matched_ref_file_names, index, index_file)
-		mismatched_mean_cov = mean_norm(mismatched_ref_files_names, index)
-		mismatched_med_cov = med_norm(mismatched_ref_files_names, index, index_file)
-
-	return(list("ref_mean_cov"=mean_cov, "ref_med_cov"=median_cov, "ref_n"=length(ref_filenames)
-							, "matched_mean_cov"=matched_mean_cov, "matched_med_cov"=matched_med_cov, "matched_n"=length(matched_ref_file_names)
-							, "mismatched_mean_cov"=mismatched_mean_cov, "mismatched_med_cov"=mismatched_med_cov, "mismatched_n"=length(mismatched_ref_files_names)))
-	}
-
+	# Default value
+	cor_cut = 0.9
 	# bin_dir was called log2_path before
-	output_file = paste0(outputdir, "/", sample_name)
-	sample_files = dir(bin_dir, full.names=TRUE)
+	output_file = paste0(logr_dir, "/", sample_name)
 	sample_file = paste0(bin_dir, '/', sample_name)
 
 	index = read.table(index_file)
 	data = get_sample(sample_file, index)
-	ref = get_reference(sample_name, sample_file, index, index_file, correlation_path, bin_dir, gender_file, batch_size)
+	
+	# Mixed ref
+	ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mixed")
+	ref_filenames = paste0(bin_dir, '/', ref_samples)
+	ref_mean_cov = mean_norm(ref_filenames, index)
+	ref_med_cov = med_norm(ref_filenames, index, index_file)
+	# Gender matched ref
+	matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="matched")
+	matched_ref_filenames = paste0(bin_dir, '/', matched_ref_samples)
+	matched_mean_cov = mean_norm(matched_ref_filenames, index)
+	matched_med_cov = med_norm(matched_ref_filenames, index, index_file)
+	# Gender mismatched ref
+	mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
+	mismatched_ref_filenames = paste0(bin_dir, '/', mismatched_ref_samples)
+	mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
+	mismatched_med_cov = med_norm(mismatched_ref_filenames, index, index_file)
 
-	dat = data.frame(index, data, ref$ref_mean_cov, ref$ref_med_cov, ref$matched_mean_cov, ref$matched_med_cov, ref$mismatched_mean_cov, ref$mismatched_med_cov)
+	dat = data.frame(index, data, ref_mean_cov, ref_med_cov, matched_mean_cov, matched_med_cov, mismatched_mean_cov, mismatched_med_cov)
 	write.table(dat, file=output_file, sep="\t", row.names=F, quote=F, col.names=F)
 
 }
@@ -420,7 +459,7 @@ processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	## tmp & output
 	tempfile = paste0(rbin_dir, "/", sample_name, ".tmp")
 	binfile = paste0(rbin_dir, "/", sample_name)
-	## TODO: These should be redunant
+	## TODO: These should be removed as they are redunant
 	# chr = as.character(data[,1]) 
 	# chr[chr=="X"] = "23"
 	# chr[chr=="Y"] = "24"
@@ -437,12 +476,11 @@ processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	rname = RbinConvert_exome_ratio(tempfile, binfile)
 }
 
-run_hmm_rbin <- function(rbin_path, sample_name, indexfile, cov_file, cor_path, gender_file, outpath,	batch_size=1000, cov_cut = 20, cor_cut = 0.9) {
+run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size=1000, cov_cut = 20, cor_cut = 0.9) {
 	hmm_call <- function(f, active=FALSE) {
-			process = data.frame(as.vector(sapply(1:ncol(f), function(x) rep(x, nrow(f))))
-														,	as.vector(sapply(1:ncol(f), function(x) 1:nrow(f)))
-														, as.vector(f)
-														)
+			process = data.frame(as.vector(sapply(1:ncol(f), function(x) rep(x, nrow(f)))),
+								as.vector(sapply(1:ncol(f), function(x) 1:nrow(f))),
+								as.vector(f))
 			v = ViteRbi(process, active=FALSE)
 			colnames(v) = c("sample", "index", "log2", "state")
 			v$state = as.factor(v$state)
@@ -475,47 +513,6 @@ run_hmm_rbin <- function(rbin_path, sample_name, indexfile, cov_file, cor_path, 
 			}
 		return(v)
 	}
-	get_reference_filenames_by_type <- function(sample_name, rbin_path, batch_size = 1000, cor_cut = 0.9, type="mixed", cor_path, gender_file) {
-		d_corl = read.table(paste0(cor_path, "/", sample_name))
-		# d_corl[,1] = basename(as.character(d_corl[,1]))
-		d = d_corl[complete.cases(d_corl),]
-		dd = d[d[,2]>cor_cut,]
-		mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
-		comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
-		best_comp =  which.max(mixmdl$mu)
-		ref_files = dd[comps==best_comp,]
-		ref_filenames = NULL
-		# for random index
-		if(type == "mixed") {
-			file_index = unique(round(runif(batch_size, 1, nrow(ref_files))))
-			ref_filenames = as.character(ref_files[file_index,1])
-			# for highest correlated samples - excluding self
-			ref_files = ref_files[order(ref_files[,2], decreasing=T),]
-			ref_filenames  = as.character(ref_files[2:(batch_size+1),1])
-			ref_filenames = ref_filenames[ref_filenames!=sample_name]
-		} else {
-			gens = read.table(gender_file, header=T)
-			gens = gens[complete.cases(gens),] # Note that this is going to remove the low covergae data which did not get gender classification
-			this_gender = gens[gens[,1]==sample_name,]
-			# for gender matched highest crrleted reference - excluding self
-			if(type == "matched") {
-				matched_ref_files = dd[dd[,1]%in%gens[gens$gender==this_gender$gender,1],]
-				matched_ref_files = matched_ref_files[order(matched_ref_files[,2], decreasing=T),]
-				matched_ref_file_names  = as.character(matched_ref_files[2:(batch_size+1),1])
-				matched_ref_file_names = matched_ref_file_names[matched_ref_file_names!=sample_name]
-				ref_filenames = matched_ref_file_names
-			}
-			# for gender mismatched highest crrleted reference - excluding self
-			if(type == "mismatched") {
-				mismatched_ref_files = dd[dd[,1]%in%gens[gens$gender!=this_gender$gender,1],]
-				mismatched_ref_files = mismatched_ref_files[order(mismatched_ref_files[,2], decreasing=T),]
-				mismatched_ref_files_names  = as.character(mismatched_ref_files[1:(batch_size),1])
-				mismatched_ref_files_names = mismatched_ref_files_names[mismatched_ref_files_names!=sample_name]
-				ref_filenames = mismatched_ref_files_names
-			}
-		}
-	return(paste(rbin_path, "/", ref_filenames, sep=""))
-	}
 	get_all_data_by_type <- function(indexfile, binfiles, type="mixed") {
 		index = read.table(indexfile)
 		chrs = unique(index[,1])
@@ -532,29 +529,29 @@ run_hmm_rbin <- function(rbin_path, sample_name, indexfile, cov_file, cor_path, 
 			calls = extract_calls(state_calls)
 		return(list("states"=state_calls, "calls"=calls))
 	}
-	hmm_by_reference_types <- function(sample_name, rbin_path, cov_file, indexfile, batch_size=1000, cor_cut = 0.9, cov_cut = 20, cor_path, gender_file, states_outname, call_outname) {
+	hmm_by_reference_types <- function(sample_name, rbin_path, cov_file, index_file, batch_size=1000, cor_cut = 0.9, cov_cut = 20, cor_dir, gender_file, states_outname, call_outname) {
 		# the mean coverage of each bait location across all samples
 		cov = read.table(cov_file)
 
-		# get mismatched filenames for training
-		binfiles = get_reference_filenames_by_type(sample_name, rbin_path, batch_size, cor_cut, "mismatched", cor_path, gender_file)
-		all_data = get_all_data_by_type(indexfile, binfiles, "mismatched")
-
-		sample_data = get_all_data_by_type(indexfile, paste0(rbin_path, "/", sample_name), "mixed")
+		# get mismatched ref filenames for training
+		mismatch_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
+		rbin_files = paste0(rbin_path, '/', mismatch_ref_samples)
+		all_data = get_all_data_by_type(index_file, rbin_files, "mismatched")
+		# get mixed data for sample
+		sample_data = get_all_data_by_type(index_file, paste0(rbin_path, "/", sample_name), "mixed")
 		all_data = data.frame(sample_data, all_data[,-(1:3)])
 
-		# run hmm trained on all data that made up each reference separatly
+		# run hmm trained on all data that made up each reference separately
 		state_calls = process_and_collect(all_data[cov[,4]>cov_cut,])
 		write.table(state_calls$states, file=states_outname, sep="\t", row.names=F, quote=F)
 		write.table(state_calls$calls, file=call_outname, sep="\t", row.names=F, quote=F)
 	}
 
 	require(ViteRbi)
-	print (sample_name)
-	system(paste("mkdir ", outpath, "/", sample_name, sep=""))
-	states_output_file = paste0(outpath, "/", sample_name, "/", sample_name, "_mixed_states.txt", sep="")
-	calls_output_file = paste0(outpath, "/", sample_name, "/", sample_name, "_mixed_calls.txt", sep="")
-	hmm_by_reference_types(sample_name, rbin_path, cov_file, indexfile, batch_size, cor_cut, cov_cut, cor_path, gender_file, states_output_file, calls_output_file)
+	system(paste("mkdir ", cnv_dir, "/", sample_name, sep=""))
+	states_output_file = paste0(cnv_dir, "/", sample_name, "/", sample_name, "_mixed_states.txt", sep="")
+	calls_output_file = paste0(cnv_dir, "/", sample_name, "/", sample_name, "_mixed_calls.txt", sep="")
+	hmm_by_reference_types(sample_name, rbin_dir, cov_file, index_file, batch_size, cor_cut, cov_cut, cor_dir, gender_file, states_output_file, calls_output_file)
 }
 
 

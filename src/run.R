@@ -25,13 +25,19 @@ if(args[1] == "processtobin_fast") {
 }
 
 if(args[1] == "classify_gender") {
-	project_root = args[2]
-	index_file = args[3]
+	bin_dir = args[2]
+	index_tab = args[3]
 	qc_file = args[4]
 	gender_file = args[5]
-	bin_dir= paste(project_root, "/bin", sep="")
-	classify_gender(bin_dir, index_file, qc_file)
+	classify_gender(bin_dir, index_tab, qc_file)
 	assign_gender(qc_file, gender_file)
+}
+
+if(args[1] == "generate_coverage") {
+	bin_dir = args[2]
+	index_tab = args[3]
+	cov_file = args[4]
+	generate_coverage(bin_dir, index_tab, cov_file)
 }
 
 if(args[1] == "generate_correlation") {
