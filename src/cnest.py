@@ -97,6 +97,14 @@ def get_args():
     args = parser.parse_args()
     return args
 
+def run_cmd(cmd):
+    """ Run a bash command
+    """
+    try:
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError as err:
+        logger.error(f'#{err.cmd}# failed with exit code {err.returncode}.\n{err.stderr}')
+
 
 def step1(project, bed_path, debug):
     accepted_chr = [str(i) for i in range(1, 23)] + ['X', 'Y']
@@ -236,7 +244,7 @@ def step2_fast(project, sample_id, input_file, fasta_file, debug):
     cmd3 = ['Rscript', '/resources/run.R',
             'processtobin_fast', project, sample_id]
     logger.debug('CMD=' + " ".join(cmd3))
-    subprocess.run(cmd3, capture_output=True, check=True)
+    run_cmd(cmd3)
     # clean temp files
     if not debug:
         os.remove(tmp_path1)
@@ -260,22 +268,17 @@ def step3(bin_dir, index_tab, qc_file, gender_file, cov_file):
         Rscript /resources/run.R generate_coverage ${bin_dir} ${index_tab} ${cov_file}
     """
     logger.info('Starting step3')
+    # Classify gender
     cmd3_1 = ['Rscript', '/resources/run.R', 'classify_gender',
            bin_dir, index_tab, qc_file, gender_file]
     logger.debug('CMD | ' + " ".join(cmd3_1))
-    process = subprocess.run(cmd3_1, capture_output=True)
-    if process.returncode == 0:
-        logger.info('classify_gender done')
-    else:
-        logger.error(
-            f'classify_gender failed with exit code {process.returncode}.\n{process.stderr}')
+    run_cmd(cmd3_1)
+    logger.info('classify_gender done')
+    # generate_coverage
     cmd3_2 = ['Rscript', '/resources/run.R', 'generate_coverage',
            bin_dir, index_tab, cov_file]
     logger.debug('CMD | ' + " ".join(cmd3_2))
-    try:
-        process = subprocess.run(cmd3_2, capture_output=True, text=True, check=True)
-    except subprocess.CalledProcessError as err:
-        logger.error(f'generate_coverage failed with exit code {err.returncode}.\n{err.stderr}')
+    run_cmd(cmd3_2)
     logger.info('generate_coverage done')
     logger.info('Step3 done')
 
@@ -306,19 +309,19 @@ def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_f
     cmd4 = ['Rscript', '/resources/run.R', 'generate_correlation',
             bin_dir, cor_dir, sample_name, index_tab]
     logger.debug('CMD=' + " ".join(cmd4))
-    subprocess.run(cmd4, capture_output=True, check=True)
+    run_cmd(cmd4)
     logger.info('generate_correlation done')
     # Original Step5 - get_references
     cmd5 = ['Rscript', '/resources/run.R', 'get_references', bin_dir,
             cor_dir, logr_dir, sample_name, index_tab, gender_file, str(batch_size)]
     logger.debug('CMD=' + " ".join(cmd5))
-    subprocess.run(cmd5, capture_output=True, check=True)
+    run_cmd(cmd5)
     logger.info('get_references done')
     # Original Step6 - processLogRtoBin
     cmd6 = ['Rscript', '/resources/run.R',
             'processLogRtoBin', logr_dir, rbin_dir, sample_name]
     logger.debug('CMD=' + " ".join(cmd6))
-    subprocess.run(cmd6, capture_output=True, check=True)
+    run_cmd(cmd6)
     logger.info('processLogRtoBin done')
     # Clean
     if not debug:
