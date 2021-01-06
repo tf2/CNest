@@ -103,7 +103,9 @@ def run_cmd(cmd):
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True)
     except subprocess.CalledProcessError as err:
-        logger.error(f'#{err.cmd}# failed with exit code {err.returncode}.\n{err.stderr}')
+        cmd_str = " ".join(err.cmd)
+        logger.error(f'#{cmd_str}# failed with exit code {err.returncode}.\n{err.stderr}')
+        sys.exit(1)
 
 
 def step1(project, bed_path, debug):

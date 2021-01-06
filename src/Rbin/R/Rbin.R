@@ -428,33 +428,31 @@ get_references <- function(sample_name, index_file, gender_file, logr_dir,
 	index = read.table(index_file)
 	data = get_sample(sample_file, index)
 	
+	# ! Mean coverage was not used at the current version, so they are not calculated anymore
 	# Mixed ref
 	ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mixed")
 	ref_filenames = paste0(bin_dir, '/', ref_samples)
-	ref_mean_cov = mean_norm(ref_filenames, index)
+	# ref_mean_cov = mean_norm(ref_filenames, index)
 	ref_med_cov = med_norm(ref_filenames, index, index_file)
 	# Gender matched ref
 	matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="matched")
 	matched_ref_filenames = paste0(bin_dir, '/', matched_ref_samples)
-	matched_mean_cov = mean_norm(matched_ref_filenames, index)
+	# matched_mean_cov = mean_norm(matched_ref_filenames, index)
 	matched_med_cov = med_norm(matched_ref_filenames, index, index_file)
 	# Gender mismatched ref
 	mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
 	mismatched_ref_filenames = paste0(bin_dir, '/', mismatched_ref_samples)
-	mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
+	# mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
 	mismatched_med_cov = med_norm(mismatched_ref_filenames, index, index_file)
 
-	dat = data.frame(index, data, ref_mean_cov, ref_med_cov, matched_mean_cov, matched_med_cov, mismatched_mean_cov, mismatched_med_cov)
+	dat = data.frame(index, data, ref_med_cov, matched_med_cov, mismatched_med_cov)
 	write.table(dat, file=output_file, sep="\t", row.names=F, quote=F, col.names=F)
-
 }
 
 processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	## input
 	# V1-V4: chrom, start, end, count
-	# V5, V6: mix_mean, mix_median
-	# V7, V8: gender_match_mean, gender_match_median
-	# V9, V10: gender_mismatch_mean, gender_mismatch_median
+	# V5, V6, V7: mix_median, gender_match_median, gender_mismatch_median
 	data = read.table(paste0(logr_dir, '/', sample_name), sep="\t")
 	## tmp & output
 	tempfile = paste0(rbin_dir, "/", sample_name, ".tmp")
@@ -465,11 +463,11 @@ processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	# chr[chr=="Y"] = "24"
 	# data[,1] = as.numeric(chr)
 	# data = data[order(data[,1], data[,2], data[,3]),]
-	l = log2((data[,4]+1)/(data[,6]+1)) # log2(count/mix_median)
+	l = log2((data[,4]+1)/(data[,5]+1)) # log2(count/mix_median)
 	l1= l-median(l[data[,1]<23])
-	l = log2((data[,4]+1)/(data[,8]+1)) # log2(count/gender_match_median)
+	l = log2((data[,4]+1)/(data[,6]+1)) # log2(count/gender_match_median)
 	l2= l-median(l[data[,1]<23])
-	l = log2((data[,4]+1)/(data[,10]+1)) # log2(count/gender_mismatch_median)
+	l = log2((data[,4]+1)/(data[,7]+1)) # log2(count/gender_mismatch_median)
 	l3 = l-median(l[data[,1]<23])
 	data = data.frame(data[,1:3], l1, l2, l3)
 	write.table(data, file=tempfile, sep="\t", row.names=F, col.names=F, quote=F)
