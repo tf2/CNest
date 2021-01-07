@@ -347,26 +347,31 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 	write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
 }
 
+## This function returns sample_names based on type (mixed, matched and mismatched)
+## Will be used in get_references() and run_hmm_rbin()
 `get_ref_sample_names_by_type` <- function(sample_name, cor_dir, gender_file, batch_size = 5000, cor_cut = 0.9, type="mixed") {
-	## This function returns sample_names based on type (mixed, matched and mismatched)
-	## Will be used in get_references() and run_hmm_rbin()
-	
 	## Process sample correlation file
 	# V1 is sample name; V2 is cor coeff
 	d_corl = read.table(paste0(cor_dir, "/", sample_name))
-	# excluding self
-	dd = subset(d_corl, V1!=sample_name)
+	dd = subset(d_corl, V1!=sample_name) # excluding self
 	dd = dd[complete.cases(dd),] # na remove
 	dd = subset(dd, V2>cor_cut) # keep samples above cutoff
-	## Run EM
-	mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
-	comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
-	best_comp =  which.max(mixmdl$mu)
-	ref_samples = dd[comps==best_comp,]
+	dd = dd[order(dd$V2, decreasing=T),] # sort by correlation
 	if (type == 'mixed') {
-		# for highest correlated samples - excluding self
-		ref_samples = ref_samples[order(ref_samples[,2], decreasing=T),]
-		ref_sample_names  = as.character(ref_samples[1:(batch_size), 'V1'])
+		## Run EM
+		set.seed(19930123)
+		mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
+		comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
+		best_comp =  which.max(mixmdl$mu)
+		ref_samples = dd[comps==best_comp,]
+		# Check if ref_samples size = batch_size
+		if (nrow(ref_samples) < batch_size) {
+			warning(sprintf("Mixed ref samples n = %d < batch_size %d\n", length(ref_samples, batch_size)))
+			extra_required = batch_size - nrow(ref_samples)
+			ref_sample_names = as.character(c(ref_samples[1:batch_size, 'V1'], dd[comps!=best_comp,][1:extra_required, 'V1']))
+		} else {
+			ref_sample_names  = as.character(ref_samples[1:batch_size, 'V1'])
+		}
 	} else {
 		# gender-based references
 		gens = read.table(gender_file, header=T)
@@ -375,14 +380,12 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 		# for gender matched highest corrleted reference - excluding self
 		if (type == 'matched') {
 			matched_ref_samples = dd[dd$V1 %in% gens[gens$gender==this_gender$gender,1],]
-			matched_ref_samples = matched_ref_samples[order(matched_ref_samples[,2], decreasing=T),]
-			ref_sample_names  = as.character(matched_ref_samples[1:(batch_size), 'V1'])
+			ref_sample_names  = as.character(matched_ref_samples[1:batch_size, 'V1'])
 		}
 		# for gender mismatched highest corrleted reference - excluding self
 		if (type == 'mismatched') {
 			mismatched_ref_samples = dd[dd$V1 %in% gens[gens$gender!=this_gender$gender,1],]
-			mismatched_ref_samples = mismatched_ref_samples[order(mismatched_ref_samples[,2], decreasing=T),]
-			ref_sample_names  = as.character(mismatched_ref_samples[1:(batch_size), 'V1'])
+			ref_sample_names  = as.character(mismatched_ref_samples[1:batch_size, 'V1'])
 		}
 	}
 	ref_sample_names = ref_sample_names[complete.cases(ref_sample_names)]
