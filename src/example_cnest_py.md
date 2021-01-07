@@ -28,7 +28,27 @@ singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref
 
 ## Run Step3
 ```bash
-singularity run -B "${output_path}:/output" --pwd "/output/" docker://smshuai/cnest:dev step3 --project $project_name
+singularity run -B "${output_path}:/output" --pwd "/output/" docker://smshuai/cnest:dev step3 \
+    --project $project_name
+```
+
+## Run Step4
+```bash
+index_tab=$project_name/index_tab.txt
+bin_dir=$project_name/bin
+cor_dir=$project_name/cor
+logr_dir=$project_name/logr
+rbin_dir=$project_name/rbin
+gender_file=$project_name/gender_classification.txt
+singularity run -B "${output_path}:/output" --pwd "/output/" docker://smshuai/cnest:dev2 step4 \
+    --indextab $index_tab \
+    --bindir $bin_dir \
+    --cordir $cor_dir \
+    --logrdir $logr_dir \
+    --rbindir $rbin_dir \
+    --sample $sample_name \
+    --gender $gender_file \
+    --batch 1000
 ```
 
 # Using Docker
