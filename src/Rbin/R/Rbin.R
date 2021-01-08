@@ -366,7 +366,7 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 		ref_samples = dd[comps==best_comp,]
 		# Check if ref_samples size = batch_size
 		if (nrow(ref_samples) < batch_size) {
-			warning(sprintf("Mixed ref samples n = %d < batch_size %d\n", length(ref_samples, batch_size)))
+			warning(sprintf("Mixed ref samples n = %d < batch_size %d\n", nrow(ref_samples), batch_size))
 			extra_required = batch_size - nrow(ref_samples)
 			ref_sample_names = as.character(c(ref_samples[1:batch_size, 'V1'], dd[comps!=best_comp,][1:extra_required, 'V1']))
 		} else {

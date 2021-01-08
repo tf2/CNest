@@ -345,7 +345,13 @@ def step5(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_f
         Rscript /resources/run.R run_hmm_rbin ${rbin_dir} ${cor_dir} ${cnv_dir} ${sample_name} \
             ${index_tab} ${cov_file} ${gender_file} ${batch_size}
     """
-    pass
+    logger.info('Start step5')
+    cmd7 = ['Rscript', '/resources/run.R',
+            'run_hmm_rbin', rbin_dir, cor_dir, cnv_dir, sample_name, index_tab,
+            cov_file, gender_file, str(batch_size)]
+    logger.debug('CMD | ' + " ".join(cmd7))
+    run_cmd(cmd7)
+    logger.info('Step5 done')
 
 
 def ix2id(sample_index, gender_file):
