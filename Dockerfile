@@ -5,7 +5,23 @@
 # Email: tomas@ebi.ac.uk
 ########################################################################
 
+########################################################################
+# Stage 1: Install hts-nim-tools with miniconda
+########################################################################
+FROM continuumio/miniconda3:4.9.2-alpine AS builder
+
+RUN conda config --add channels defaults
+RUN conda config --add channels bioconda
+RUN conda config --add channels conda-forge
+RUN conda install -y hts-nim-tools=0.3.11-0
+RUN /opt/conda/bin/conda clean --yes --force-pkgs-dirs
+
+########################################################################
+# Stage 2
+########################################################################
 FROM rstudio/r-base:3.6-bionic
+
+COPY --from=builder /opt/conda /opt/conda
 
 ########################################################################
 # Install samtools, bcftools, python3 and dependancies
@@ -14,7 +30,7 @@ ENV APP_NAME=samtools
 ENV VERSION=1.9
 ENV APPS=/software/applications
 ENV DEST=$APPS/$APP_NAME/
-ENV PATH=/resources/:$APPS/$APP_NAME/$VERSION/bin:$APPS/bcftools/$VERSION/bin:$PATH
+ENV PATH=/opt/conda/bin/:/resources/:$APPS/$APP_NAME/$VERSION/bin:$APPS/bcftools/$VERSION/bin:$PATH
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential python3.8
@@ -81,14 +97,14 @@ RUN R CMD INSTALL mixtools_1.2.0.tar.gz
 COPY src/ViteRbi_1.0.tar.gz /
 RUN R CMD INSTALL ViteRbi_1.0.tar.gz
 
-COPY src/Rbin_1.0.tar.gz /
-RUN R CMD INSTALL Rbin_1.0.tar.gz
+COPY src/Rbin_1.1.tar.gz /
+RUN R CMD INSTALL Rbin_1.1.tar.gz
 
 ########################################################################
 # Remove package sources
 ########################################################################
 
-RUN rm -rf /$CNV_APP /Rbin_1.0.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /htslib /segmented_1.2-0.tar.gz /kernlab_0.9-29.tar.gz /MASS_7.3-51.6.tar.gz /survival_3.2-3.tar.gz /mixtools_1.2.0.tar.gz 
+RUN rm -rf /$CNV_APP /Rbin_1.1.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /htslib /segmented_1.2-0.tar.gz /kernlab_0.9-29.tar.gz /MASS_7.3-51.6.tar.gz /survival_3.2-3.tar.gz /mixtools_1.2.0.tar.gz 
 
 ########################################################################
 # Setup the mount locations and copy some resources
@@ -96,15 +112,10 @@ RUN rm -rf /$CNV_APP /Rbin_1.0.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /ht
 #	- TODO: auto resource generation functionality 
 ########################################################################
 
-RUN mkdir -p /resources
-RUN mkdir -p /input_location
-RUN mkdir -p /output_location
-RUN mkdir -p /ref
+RUN mkdir -p /resources/ /input/ /output/ /ref/
 ENV REF_PATH=/ref/%2s/%2s/%s
 
-COPY src/run /resources
-COPY src/run.R /resources
-COPY src/cnest.py /resources
+COPY src/run src/run.R src/cnest.py /resources/
 RUN chmod +x /resources/cnest.py
 
 ENTRYPOINT ["python3.8", "/resources/cnest.py"]
