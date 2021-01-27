@@ -302,6 +302,7 @@ generate_coverage <- function(bin_dir, index_file, cov_file) {
 
 generate_correlation <- function(bin_dir, cor_dir, sample_name, index_file) {
 	index = read.table(index_file)
+	keep = index$V1 < 23 # no sex chroms
 	filenames = dir(bin_dir, full.names=TRUE)
 	cor_file = paste0(cor_dir, "/", sample_name)
 	rr1= .C( "getValues",
@@ -320,7 +321,7 @@ generate_correlation <- function(bin_dir, cor_dir, sample_name, index_file) {
 		   		"values" = as.double(1:nrow(index)),
 		   		"PACKAGE" = "Rbin"
 				)$values
-		co[x] = cor(rr1, rr2)
+		co[x] = cor(rr1[keep], rr2[keep])
 	}
 	dataset = data.frame(basename(filenames), co)
 	write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
@@ -433,16 +434,19 @@ get_references <- function(sample_name, index_file, gender_file, logr_dir,
 	
 	# ! Mean coverage was not used at the current version, so they are not calculated anymore
 	# Mixed ref
+	print('Mixed ref')
 	ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mixed")
 	ref_filenames = paste0(bin_dir, '/', ref_samples)
 	# ref_mean_cov = mean_norm(ref_filenames, index)
 	ref_med_cov = med_norm(ref_filenames, index, index_file)
 	# Gender matched ref
+	print('Gender matched ref')
 	matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="matched")
 	matched_ref_filenames = paste0(bin_dir, '/', matched_ref_samples)
 	# matched_mean_cov = mean_norm(matched_ref_filenames, index)
 	matched_med_cov = med_norm(matched_ref_filenames, index, index_file)
 	# Gender mismatched ref
+	print('Gender mismatched ref')
 	mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
 	mismatched_ref_filenames = paste0(bin_dir, '/', mismatched_ref_samples)
 	# mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
