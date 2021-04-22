@@ -161,4 +161,21 @@ docker run -v "${output_path}:/output" -w "/output" -it --rm smshuai/cnest:dev2 
 
 ### Run Step5
 ```bash
+index_tab=$project_name/index_tab.txt
+bin_dir=$project_name/bin
+cor_dir=$project_name/cor
+cnv_dir=$project_name/cnv
+rbin_dir=$project_name/rbin
+gender_file=$project_name/gender_classification.txt
+cov_file=$project_name/mean_coverage.txt
+docker run -v "$PWD:$PWD" -w "$PWD" -it --rm \
+    smshuai/cnest:dev2 step5 \
+    --indextab $index_tab \
+    --rbindir $rbin_dir \
+    --cordir $cor_dir \
+    --cnvdir $cnv_dir \
+    --cov    $cov_file \
+    --sample $sample_name \
+    --gender $gender_file \
+    --batch 300
 ```
