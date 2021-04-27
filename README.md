@@ -61,7 +61,7 @@ Docker
 
 1. Clone the repo
 ```sh
-git clone https://github.com/tf/CNest.git
+git clone https://github.com/tf2/CNest.git
 ```
 2. Build the docker image
 ```sh
