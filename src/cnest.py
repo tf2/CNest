@@ -56,23 +56,23 @@ def get_args():
                           type=str, help='Coverage file path [output]')
     # step 4
     parser_4 = subparsers.add_parser('step4', help='Sample Correlation & Rbin generation')
-    parser_4.add_argument('--indextab', dest='index_tab',
-                          required=True, type=str, help='Index tab file from step1')
+    parser_4.add_argument('--indextab', dest='index_tab', required=True,
+                          type=str, help='Index tab file from step1')
     parser_4.add_argument('--bindir', dest='bin_dir', required=True,
                           type=str, help='Directory for all bin files from step2')
-    parser_4.add_argument('--cordir', dest='cor_dir',
-                          required=True, type=str, help='Directory for cor file [output]')
-    parser_4.add_argument('--logrdir', dest='logr_dir',
-                          required=True, type=str, help='Directory for logr file [output]')
-    parser_4.add_argument('--rbindir', dest='rbin_dir',
-                          required=True, type=str, help='Directory for rbin file [output]')
-    parser_4.add_argument('--gender', dest='gender_file',
+    parser_4.add_argument('--cordir', dest='cor_dir', required=True, 
+                          type=str, help='Directory for cor file [output]')
+    parser_4.add_argument('--logrdir', dest='logr_dir', required=True,
+                          type=str, help='Directory for logr file [output]')
+    parser_4.add_argument('--rbindir', dest='rbin_dir', required=True,
+                          type=str, help='Directory for rbin file [output]')
+    parser_4.add_argument('--gender', dest='gender_file', required=True,
                           type=str, help='Gender classification file from step3')
     parser_4.add_argument('--sample', dest='sample_id',
                           type=str, help='Sample name')
-    parser_4.add_argument('--splix', dest='sample_ix', type=int,
-                          help='Sample index (alternative to --sample; deprecated)')
-    parser_4.add_argument('--batch', dest='batch_size',
+    parser_4.add_argument('--splix', dest='sample_ix',
+                          type=int, help='Sample index (alternative to --sample; deprecated)')
+    parser_4.add_argument('--batch', dest='batch_size', required=True,
                           type=int, help='Maximum number of samples used as references')
     # step 5
     parser_5 = subparsers.add_parser('step5', help='HMM Call')

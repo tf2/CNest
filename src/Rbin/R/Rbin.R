@@ -302,6 +302,7 @@ generate_coverage <- function(bin_dir, index_file, cov_file) {
 
 generate_correlation <- function(bin_dir, cor_dir, sample_name, index_file) {
 	index = read.table(index_file)
+	keep = index$V1 < 23 # no sex chroms
 	filenames = dir(bin_dir, full.names=TRUE)
 	cor_file = paste0(cor_dir, "/", sample_name)
 	rr1= .C( "getValues",
@@ -320,7 +321,7 @@ generate_correlation <- function(bin_dir, cor_dir, sample_name, index_file) {
 		   		"values" = as.double(1:nrow(index)),
 		   		"PACKAGE" = "Rbin"
 				)$values
-		co[x] = cor(rr1, rr2)
+		co[x] = cor(rr1[keep], rr2[keep])
 	}
 	dataset = data.frame(basename(filenames), co)
 	write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
@@ -433,16 +434,19 @@ get_references <- function(sample_name, index_file, gender_file, logr_dir,
 	
 	# ! Mean coverage was not used at the current version, so they are not calculated anymore
 	# Mixed ref
+	print('Mixed ref')
 	ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mixed")
 	ref_filenames = paste0(bin_dir, '/', ref_samples)
 	# ref_mean_cov = mean_norm(ref_filenames, index)
 	ref_med_cov = med_norm(ref_filenames, index, index_file)
 	# Gender matched ref
+	print('Gender matched ref')
 	matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="matched")
 	matched_ref_filenames = paste0(bin_dir, '/', matched_ref_samples)
 	# matched_mean_cov = mean_norm(matched_ref_filenames, index)
 	matched_med_cov = med_norm(matched_ref_filenames, index, index_file)
 	# Gender mismatched ref
+	print('Gender mismatched ref')
 	mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
 	mismatched_ref_filenames = paste0(bin_dir, '/', mismatched_ref_samples)
 	# mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
@@ -496,22 +500,22 @@ run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, g
 			}
 		return(v)
 	}
-	hmm_call_all_together <- function(f, active=FALSE) {
-			sample_index = as.vector(sapply(1:ncol(f), function(x) rep(x, nrow(f))))
-			process = data.frame(1, 1, as.vector(f))
-			v = ViteRbi(process, active=FALSE)
-			colnames(v) = c("sample", "index", "log2", "state")
-			v$sample = sample_index
-			v$state = as.factor(v$state)
-			sams = unique(v$sample)
-			if(active==TRUE) {
-				for(x in 1:length(sams)) {
-					vv = v[v[,1]==sams[x],]
-					g1 = ggplot(data=vv, aes(x=state, y= log2, fill= state)) + geom_violin()+theme_bw()
-					g2 = ggplot(data=vv, aes(x=index, y= log2, color= state)) + geom_point(size=0.1)+ylim(-2,2)+theme_bw()
-					multiplot(g1, g2, cols=1)
-				}
+	hmm_call_all_together <- function(m, active=FALSE) {
+		sample_index = as.vector(sapply(1:ncol(m), function(x) rep(x, nrow(m))))
+		process = data.frame(1, 1, as.vector(m))
+		v = ViteRbi(process, active=FALSE)
+		colnames(v) = c("sample", "index", "log2", "state")
+		v$sample = sample_index
+		v$state = as.factor(v$state)
+		sams = unique(v$sample)
+		if(active==TRUE) {
+			for(x in 1:length(sams)) {
+				vv = v[v[,1]==sams[x],]
+				g1 = ggplot(data=vv, aes(x=state, y= log2, fill= state)) + geom_violin()+theme_bw()
+				g2 = ggplot(data=vv, aes(x=index, y= log2, color= state)) + geom_point(size=0.1)+ylim(-2,2)+theme_bw()
+				multiplot(g1, g2, cols=1)
 			}
+		}
 		return(v)
 	}
 	get_all_data_by_type <- function(indexfile, binfiles, type="mixed") {
@@ -520,14 +524,14 @@ run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, g
 		return(do.call(rbind, sapply(chrs, function(x) RbinRead_exome_ratio(x, min(index[index[,1]==x,2]), max(index[index[,1]==x,3]), type, indexfile, binfiles))))
 	}
 	process_and_collect <- function(m) {
-			pos = m[,1:3]
-			m = as.matrix(m[,-(1:3)])
-			### NOTE: this is the HMM call 
-			m_v = hmm_call_all_together(m, active=FALSE)
-			state_calls = m_v[1:nrow(pos),]
-			#state_calls = m_v[m_v[,1]==1,]
-			state_calls[,1:2] = pos[,1:2]
-			calls = extract_calls(state_calls)
+		pos = m[,1:3]
+		m = as.matrix(m[,-(1:3)])
+		### NOTE: this is the HMM call 
+		m_v = hmm_call_all_together(m, active=FALSE)
+		state_calls = m_v[1:nrow(pos),]
+		#state_calls = m_v[m_v[,1]==1,]
+		state_calls[,1:2] = pos[,1:2]
+		calls = extract_calls(state_calls)
 		return(list("states"=state_calls, "calls"=calls))
 	}
 	hmm_by_reference_types <- function(sample_name, rbin_path, cov_file, index_file, batch_size=1000, cor_cut = 0.9, cov_cut = 20, cor_dir, gender_file, states_outname, call_outname) {
