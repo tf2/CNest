@@ -358,6 +358,7 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 	dd = dd[complete.cases(dd),] # na remove
 	dd = subset(dd, V2>cor_cut) # keep samples above cutoff
 	dd = dd[order(dd$V2, decreasing=T),] # sort by correlation
+	dd$V1 = as.character(dd$V1)
 	if (type == 'mixed') {
 		## Run EM
 		set.seed(19930123)
