@@ -484,7 +484,7 @@ processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	rname = RbinConvert_exome_ratio(tempfile, binfile)
 }
 
-run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size=1000, cov_cut = 20, cor_cut = 0.9, skip_em) {
+run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size=1000, cov_cut = 20, cor_cut = 0.9, skip_em=FALSE) {
 	hmm_call <- function(f, active=FALSE) {
 			process = data.frame(as.vector(sapply(1:ncol(f), function(x) rep(x, nrow(f)))),
 								as.vector(sapply(1:ncol(f), function(x) 1:nrow(f))),
@@ -537,7 +537,7 @@ run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, g
 		calls = extract_calls(state_calls)
 		return(list("states"=state_calls, "calls"=calls))
 	}
-	hmm_by_reference_types <- function(sample_name, rbin_path, cov_file, index_file, batch_size=1000, cor_cut = 0.9, cov_cut = 20, cor_dir, gender_file, states_outname, call_outname) {
+	hmm_by_reference_types <- function(sample_name, rbin_path, cov_file, index_file, batch_size=1000, cov_cut = 20, cor_cut = 0.9, skip_em, cor_dir, gender_file, states_outname, call_outname) {
 		# the mean coverage of each bait location across all samples
 		cov = read.table(cov_file)
 
@@ -559,7 +559,7 @@ run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, g
 	system(paste("mkdir ", cnv_dir, "/", sample_name, sep=""))
 	states_output_file = paste0(cnv_dir, "/", sample_name, "/", sample_name, "_mixed_states.txt", sep="")
 	calls_output_file = paste0(cnv_dir, "/", sample_name, "/", sample_name, "_mixed_calls.txt", sep="")
-	hmm_by_reference_types(sample_name, rbin_dir, cov_file, index_file, batch_size, cor_cut, cov_cut, cor_dir, gender_file, states_output_file, calls_output_file)
+	hmm_by_reference_types(sample_name, rbin_dir, cov_file, index_file, batch_size, cov_cut, cor_cut, skip_em, cor_dir, gender_file, states_output_file, calls_output_file)
 }
 
 
