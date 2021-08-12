@@ -12,7 +12,10 @@ classify_gender,
 assign_gender,
 generate_coverage,
 generate_correlation,
+generate_correlation_batch,
+generate_correlation_fast,
 get_references,
+get_ref_sample_names_by_type,
 processLogRtoBin,
 run_hmm_rbin
 )

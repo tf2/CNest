@@ -49,6 +49,16 @@ if(args[1] == "generate_correlation") {
 	print ("generate_correlation")
 }
 
+if(args[1] == "generate_correlation_batch") {
+	bin_dir = args[2]  # path to all bin files
+	cor_dir = args[3] # output cor dir
+	batch_size = as.numeric(as.character(args[4])) # index_tab.txt path
+	start_pos = as.numeric(as.character(args[5])) # index_tab.txt path
+	index_file = args[6] # index_tab.txt path
+	generate_correlation_batch(bin_dir, cor_dir, batch_size, start_pos, index_file)
+	print ("generate_correlation batch")
+}
+
 if(args[1] == "get_references") {
 	# ['Rscript', '/resources/run.R', 'get_references', bin_dir, cor_dir, logr_dir, sample_name, index_tab, gender_file, batch_size]
 	bin_dir = args[2]
@@ -58,7 +68,9 @@ if(args[1] == "get_references") {
 	index_file = args[6]
 	gender_file = args[7]
 	batchsize = as.numeric(as.character(args[8]))
-	get_references(sample_name, index_file, gender_file, logr_dir, cor_dir, bin_dir, batchsize)
+    cor_cut = as.numeric(as.character(args[9]))
+    skip_em = args[10]
+	get_references(sample_name, index_file, gender_file, logr_dir, cor_dir, bin_dir, batchsize, cor_cut, skip_em)
 	print ("get_references")
 }
 
@@ -82,7 +94,10 @@ if(args[1] == "run_hmm_rbin") {
 	cov_file = args[7] # cov_file=/resources/txt_covered_all_coverage.txt 
 	gender_file = args[8]
 	batch_size = args[9]
+    cov_cut = as.numeric(as.character(args[10]))
+    cor_cut = as.numeric(as.character(args[11]))
+    skip_em = args[12]
 	print(sample_name)
-	run_hmm_rbin(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size)
+	run_hmm_rbin(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size, cov_cut, cor_cut, skip_em)
 	print ("run_hmm_rbin")
 }

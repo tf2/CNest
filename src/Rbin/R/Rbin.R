@@ -350,7 +350,7 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 
 ## This function returns sample_names based on type (mixed, matched and mismatched)
 ## Will be used in get_references() and run_hmm_rbin()
-`get_ref_sample_names_by_type` <- function(sample_name, cor_dir, gender_file, batch_size = 5000, cor_cut = 0.9, type="mixed") {
+`get_ref_sample_names_by_type` <- function(sample_name, cor_dir, gender_file, batch_size = 5000, cor_cut = 0.9, skip_em=FALSE, type="mixed") {
 	## Process sample correlation file
 	# V1 is sample name; V2 is cor coeff
 	d_corl = read.table(paste0(cor_dir, "/", sample_name))
@@ -360,20 +360,24 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 	dd = dd[order(dd$V2, decreasing=T),] # sort by correlation
 	dd$V1 = as.character(dd$V1)
 	if (type == 'mixed') {
-		## Run EM
-		set.seed(19930123)
-		mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
-		comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
-		best_comp =  which.max(mixmdl$mu)
-		ref_samples = dd[comps==best_comp,]
-		# Check if ref_samples size = batch_size
-		if (nrow(ref_samples) < batch_size) {
-			warning(sprintf("Mixed ref samples n = %d < batch_size %d\n", nrow(ref_samples), batch_size))
-			extra_required = batch_size - nrow(ref_samples)
-			ref_sample_names = as.character(c(ref_samples[1:batch_size, 'V1'], dd[comps!=best_comp,][1:extra_required, 'V1']))
-		} else {
-			ref_sample_names  = as.character(ref_samples[1:batch_size, 'V1'])
-		}
+        if(!skip_em) {
+            ## Run EM
+            set.seed(19930123)
+            mixmdl = normalmixEM(dd[,2], k=3, maxrestarts=1000)
+            comps = sapply(1:nrow(mixmdl$posterior), function(x) which.max(mixmdl$posterior[x,]))
+            best_comp =  which.max(mixmdl$mu)
+            ref_samples = dd[comps==best_comp,]
+            # Check if ref_samples size = batch_size
+            if (nrow(ref_samples) < batch_size) {
+                warning(sprintf("Mixed ref samples n = %d < batch_size %d\n", nrow(ref_samples), batch_size))
+                extra_required = batch_size - nrow(ref_samples)
+                ref_sample_names = as.character(c(ref_samples[1:batch_size, 'V1'], dd[comps!=best_comp,][1:extra_required, 'V1']))
+            } else {
+                ref_sample_names  = as.character(ref_samples[1:batch_size, 'V1'])
+            }
+        } else {
+            ref_sample_names = as.character(dd[1:batch_size, 'V1'])
+        }
 	} else {
 		# gender-based references
 		gens = read.table(gender_file, header=T)
@@ -395,7 +399,7 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 }
 
 get_references <- function(sample_name, index_file, gender_file, logr_dir,
-							cor_dir, bin_dir, batch_size = 1000) {
+							cor_dir, bin_dir, batch_size = 1000, cor_cut = 0.9, skip_em=FALSE) {
 	get_sample <- function(filename, index) {
 	return(rr1= .C( "getValues",
 				"filename" = as.character(filename),
@@ -424,8 +428,6 @@ get_references <- function(sample_name, index_file, gender_file, logr_dir,
 	return(meds)
 	}
 
-	# Default value
-	cor_cut = 0.9
 	# bin_dir was called log2_path before
 	output_file = paste0(logr_dir, "/", sample_name)
 	sample_file = paste0(bin_dir, '/', sample_name)
@@ -436,19 +438,19 @@ get_references <- function(sample_name, index_file, gender_file, logr_dir,
 	# ! Mean coverage was not used at the current version, so they are not calculated anymore
 	# Mixed ref
 	print('Mixed ref')
-	ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mixed")
+	ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="mixed")
 	ref_filenames = paste0(bin_dir, '/', ref_samples)
 	# ref_mean_cov = mean_norm(ref_filenames, index)
 	ref_med_cov = med_norm(ref_filenames, index, index_file)
 	# Gender matched ref
 	print('Gender matched ref')
-	matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="matched")
+	matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="matched")
 	matched_ref_filenames = paste0(bin_dir, '/', matched_ref_samples)
 	# matched_mean_cov = mean_norm(matched_ref_filenames, index)
 	matched_med_cov = med_norm(matched_ref_filenames, index, index_file)
 	# Gender mismatched ref
 	print('Gender mismatched ref')
-	mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
+	mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="mismatched")
 	mismatched_ref_filenames = paste0(bin_dir, '/', mismatched_ref_samples)
 	# mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
 	mismatched_med_cov = med_norm(mismatched_ref_filenames, index, index_file)
@@ -482,7 +484,7 @@ processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	rname = RbinConvert_exome_ratio(tempfile, binfile)
 }
 
-run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size=1000, cov_cut = 20, cor_cut = 0.9) {
+run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size=1000, cov_cut = 20, cor_cut = 0.9, skip_em) {
 	hmm_call <- function(f, active=FALSE) {
 			process = data.frame(as.vector(sapply(1:ncol(f), function(x) rep(x, nrow(f)))),
 								as.vector(sapply(1:ncol(f), function(x) 1:nrow(f))),
@@ -540,7 +542,7 @@ run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, g
 		cov = read.table(cov_file)
 
 		# get mismatched ref filenames for training
-		mismatch_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, type="mismatched")
+		mismatch_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="mismatched")
 		rbin_files = paste0(rbin_path, '/', mismatch_ref_samples)
 		all_data = get_all_data_by_type(index_file, rbin_files, "mismatched")
 		# get mixed data for sample

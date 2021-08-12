@@ -74,6 +74,10 @@ def get_args():
                           type=int, help='Sample index (alternative to --sample; deprecated)')
     parser_4.add_argument('--batch', dest='batch_size', required=True,
                           type=int, help='Maximum number of samples used as references')
+    parser_4.add_argument('--cor', dest='cor_cut', default=0.9,
+                          type=int, help='Minimum similarity measure for defining references')
+    parser_4.add_argument('--skipem', dest='skip_em', default=False,
+                          type=int, help='Whether or not to use the EM algorithm during reference search')
     # step 5
     parser_5 = subparsers.add_parser('step5', help='HMM Call')
     parser_5.add_argument('--indextab', dest='index_tab',
@@ -93,7 +97,13 @@ def get_args():
     parser_5.add_argument('--splix', dest='sample_ix', type=int,
                           help='Sample index (alternative to --sample; deprecated)')
     parser_5.add_argument('--batch', dest='batch_size',
-                          type=int, help='Maximum number of samples used as references')                          
+                          type=int, help='Maximum number of samples used as references')
+    parser_5.add_argument('--covc', dest='cov_cut', default=20,
+                          type=int, help='Minimum similarity measure for defining references')
+    parser_5.add_argument('--cor', dest='cor_cut', default=0.9,
+                          type=int, help='Minimum similarity measure for defining references')
+    parser_5.add_argument('--skipem', dest='skip_em', default=False,
+                          type=int, help='Whether or not to use the EM algorithm during reference search')
     args = parser.parse_args()
     return args
 
@@ -285,7 +295,7 @@ def step3(bin_dir, index_tab, qc_file, gender_file, cov_file):
     logger.info('Step3 done')
 
 
-def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_file, batch_size, debug):
+def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_file, batch_size, cor_cut, skip_em, debug):
     """Sample correlation
         project_root=/output_location/${project_name}
         index_file=${project_root}/index_tab.txt
@@ -315,7 +325,7 @@ def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_f
     logger.info('generate_correlation done')
     # Original Step5 - get_references
     cmd5 = ['Rscript', '/resources/run.R', 'get_references', bin_dir,
-            cor_dir, logr_dir, sample_name, index_tab, gender_file, str(batch_size)]
+            cor_dir, logr_dir, sample_name, index_tab, gender_file, str(batch_size), str(cor_cut), skip_em]
     logger.debug('CMD=' + " ".join(cmd5))
     run_cmd(cmd5)
     logger.info('get_references done')
@@ -331,7 +341,7 @@ def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_f
     logger.info('Step4 done')
 
 
-def step5(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, debug):
+def step5(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, cov_cut, cor_cut, skip_em, debug):
     """HMM Call
         # Original Step7
         Rscript /resources/run.R run_hmm_rbin ${project_root} ${sample_index} \
@@ -348,7 +358,7 @@ def step5(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_f
     logger.info('Start step5')
     cmd7 = ['Rscript', '/resources/run.R',
             'run_hmm_rbin', rbin_dir, cor_dir, cnv_dir, sample_name, index_tab,
-            cov_file, gender_file, str(batch_size)]
+            cov_file, gender_file, str(batch_size), str(cov_cut), str(cor_cut), skip_em]
     logger.debug('CMD | ' + " ".join(cmd7))
     run_cmd(cmd7)
     logger.info('Step5 done')
