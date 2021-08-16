@@ -69,7 +69,12 @@ if(args[1] == "get_references") {
 	gender_file = args[7]
 	batchsize = as.numeric(as.character(args[8]))
     cor_cut = as.numeric(as.character(args[9]))
-    skip_em = args[10]
+    skip_em = as.character(args[10])
+    if(skip_em=="True") {
+        skip_em = TRUE
+    } else {
+        skip_em = FALSE
+    }
 	get_references(sample_name, index_file, gender_file, logr_dir, cor_dir, bin_dir, batchsize, cor_cut, skip_em)
 	print ("get_references")
 }
@@ -96,7 +101,12 @@ if(args[1] == "run_hmm_rbin") {
 	batch_size = args[9]
     cov_cut = as.numeric(as.character(args[10]))
     cor_cut = as.numeric(as.character(args[11]))
-    skip_em = args[12]
+    skip_em = as.character(args[12])
+    if(skip_em=="True") {
+        skip_em = TRUE
+    } else {
+        skip_em = FALSE
+    }
 	print(sample_name)
 	run_hmm_rbin(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size, cov_cut, cor_cut, skip_em)
 	print ("run_hmm_rbin")

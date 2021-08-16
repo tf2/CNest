@@ -26,84 +26,49 @@ def get_args():
     subparsers = parser.add_subparsers(help='Steps of CNest', dest='step')
     # step 1
     parser_1 = subparsers.add_parser('step1', help='Create project directory')
-    parser_1.add_argument('--project', dest='project',
-                          required=True, type=str, help='Project name')
-    parser_1.add_argument('--bed', dest='bed_file', required=True,
-                          type=str, help='Input sorted BED3 file name')
+    parser_1.add_argument('--project', dest='project', required=True, type=str, help='Project name')
+    parser_1.add_argument('--bed', dest='bed_file', required=True, type=str, help='Input sorted BED3 file name')
     # step 2
     parser_2 = subparsers.add_parser('step2', help='BAM/CRAM to binary')
-    parser_2.add_argument('--project', dest='project',
-                          required=True, type=str, help='Poject name')
-    parser_2.add_argument('--sample', dest='sample_id',
-                          required=True, type=str, help='Sample name')
-    parser_2.add_argument('--input', dest='input_file',
-                          required=True, type=str, help='Input BAM/CRAM file name')
-    parser_2.add_argument('--fast', dest='fast_mode', default=False,
-                          action='store_true', help='Use fast mode')
-    parser_2.add_argument('--fasta', dest='fasta_file',
-                          default=False, help='Reference FASTA for fast mode')
+    parser_2.add_argument('--project', dest='project', required=True, type=str, help='Poject name')
+    parser_2.add_argument('--sample', dest='sample_id', required=True, type=str, help='Sample name')
+    parser_2.add_argument('--input', dest='input_file', required=True, type=str, help='Input BAM/CRAM file name')
+    parser_2.add_argument('--fast', dest='fast_mode', default=False,  action='store_true', help='Use fast mode')
+    parser_2.add_argument('--fasta', dest='fasta_file',  default=False, help='Reference FASTA for fast mode')
     # step 3
     parser_3 = subparsers.add_parser('step3', help='Gender QC')
-    parser_3.add_argument('--indextab', dest='index_tab',
-                          required=True, type=str, help='Index tab file from step1')
-    parser_3.add_argument('--bindir', dest='bin_dir', required=True,
-                          type=str, help='Directory for all bin files from step2')
-    parser_3.add_argument('--qc', dest='qc_file',
-                          required=True, type=str, help='Gender QC file path [output]')
-    parser_3.add_argument('--gender', dest='gender_file', required=True,
-                          type=str, help='Gender classification file path [output]')
-    parser_3.add_argument('--cov', dest='cov_file', required=True,
-                          type=str, help='Coverage file path [output]')
+    parser_3.add_argument('--indextab', dest='index_tab', required=True, type=str, help='Index tab file from step1')
+    parser_3.add_argument('--bindir', dest='bin_dir', required=True,  type=str, help='Directory for all bin files from step2')
+    parser_3.add_argument('--qc', dest='qc_file', required=True, type=str, help='Gender QC file path [output]')
+    parser_3.add_argument('--gender', dest='gender_file', required=True, type=str, help='Gender classification file path [output]')
+    parser_3.add_argument('--cov', dest='cov_file', required=True, type=str, help='Coverage file path [output]')
     # step 4
     parser_4 = subparsers.add_parser('step4', help='Sample Correlation & Rbin generation')
-    parser_4.add_argument('--indextab', dest='index_tab', required=True,
-                          type=str, help='Index tab file from step1')
-    parser_4.add_argument('--bindir', dest='bin_dir', required=True,
-                          type=str, help='Directory for all bin files from step2')
-    parser_4.add_argument('--cordir', dest='cor_dir', required=True, 
-                          type=str, help='Directory for cor file [output]')
-    parser_4.add_argument('--logrdir', dest='logr_dir', required=True,
-                          type=str, help='Directory for logr file [output]')
-    parser_4.add_argument('--rbindir', dest='rbin_dir', required=True,
-                          type=str, help='Directory for rbin file [output]')
-    parser_4.add_argument('--gender', dest='gender_file', required=True,
-                          type=str, help='Gender classification file from step3')
-    parser_4.add_argument('--sample', dest='sample_id',
-                          type=str, help='Sample name')
-    parser_4.add_argument('--splix', dest='sample_ix',
-                          type=int, help='Sample index (alternative to --sample; deprecated)')
-    parser_4.add_argument('--batch', dest='batch_size', required=True,
-                          type=int, help='Maximum number of samples used as references')
-    parser_4.add_argument('--cor', dest='cor_cut', default=0.9,
-                          type=int, help='Minimum similarity measure for defining references')
-    parser_4.add_argument('--skipem', dest='skip_em', default=False,
-                          type=int, help='Whether or not to use the EM algorithm during reference search')
+    parser_4.add_argument('--indextab', dest='index_tab', required=True, type=str, help='Index tab file from step1')
+    parser_4.add_argument('--bindir', dest='bin_dir', required=True, type=str, help='Directory for all bin files from step2')
+    parser_4.add_argument('--cordir', dest='cor_dir', required=True,  type=str, help='Directory for cor file [output]')
+    parser_4.add_argument('--logrdir', dest='logr_dir', required=True, type=str, help='Directory for logr file [output]')
+    parser_4.add_argument('--rbindir', dest='rbin_dir', required=True, type=str, help='Directory for rbin file [output]')
+    parser_4.add_argument('--gender', dest='gender_file', required=True, type=str, help='Gender classification file from step3')
+    parser_4.add_argument('--sample', dest='sample_id', type=str, help='Sample name')
+    parser_4.add_argument('--splix', dest='sample_ix', type=int, help='Sample index (alternative to --sample; deprecated)')
+    parser_4.add_argument('--batch', dest='batch_size', required=True, type=int, help='Maximum number of samples used as references')
+    parser_4.add_argument('--cor', dest='cor_cut', default="0.9", type=str, help='Minimum similarity measure for defining references')
+    parser_4.add_argument('--skipem', dest='skip_em', default=False, action='store_true', help='Whether or not to use the EM algorithm during reference search')
     # step 5
     parser_5 = subparsers.add_parser('step5', help='HMM Call')
-    parser_5.add_argument('--indextab', dest='index_tab',
-                          required=True, type=str, help='Index tab file from step1')
-    parser_5.add_argument('--cnvdir', dest='cnv_dir', required=True,
-                          type=str, help='Directory for CNV files [output]')
-    parser_5.add_argument('--cordir', dest='cor_dir',
-                          required=True, type=str, help='Directory for cor file from step4')
-    parser_5.add_argument('--rbindir', dest='rbin_dir',
-                          required=True, type=str, help='Directory for rbin file from step4')
-    parser_5.add_argument('--gender', dest='gender_file',
-                          type=str, help='Gender classification file from step3')
-    parser_5.add_argument('--cov', dest='cov_file',
-                          type=str, help='Coverage file from step3')
-    parser_5.add_argument('--sample', dest='sample_id',
-                          type=str, help='Sample name')
-    parser_5.add_argument('--splix', dest='sample_ix', type=int,
-                          help='Sample index (alternative to --sample; deprecated)')
-    parser_5.add_argument('--batch', dest='batch_size',
-                          type=int, help='Maximum number of samples used as references')
-    parser_5.add_argument('--covc', dest='cov_cut', default=20,
-                          type=int, help='Minimum similarity measure for defining references')
-    parser_5.add_argument('--cor', dest='cor_cut', default=0.9,
-                          type=int, help='Minimum similarity measure for defining references')
-    parser_5.add_argument('--skipem', dest='skip_em', default=False,
-                          type=int, help='Whether or not to use the EM algorithm during reference search')
+    parser_5.add_argument('--indextab', dest='index_tab', required=True, type=str, help='Index tab file from step1')
+    parser_5.add_argument('--cnvdir', dest='cnv_dir', required=True, type=str, help='Directory for CNV files [output]')
+    parser_5.add_argument('--cordir', dest='cor_dir', required=True, type=str, help='Directory for cor file from step4')
+    parser_5.add_argument('--rbindir', dest='rbin_dir', required=True, type=str, help='Directory for rbin file from step4')
+    parser_5.add_argument('--gender', dest='gender_file', type=str, help='Gender classification file from step3')
+    parser_5.add_argument('--cov', dest='cov_file', type=str, help='Coverage file from step3')
+    parser_5.add_argument('--sample', dest='sample_id', type=str, help='Sample name')
+    parser_5.add_argument('--splix', dest='sample_ix', type=int, help='Sample index (alternative to --sample; deprecated)')
+    parser_5.add_argument('--batch', dest='batch_size', type=int, help='Maximum number of samples used as references')
+    parser_5.add_argument('--covc', dest='cov_cut', default=20, type=int, help='Minimum mean coverage of targets to include in HMM calls')
+    parser_5.add_argument('--cor', dest='cor_cut', default="0.9", type=str, help='Minimum similarity measure for defining references')
+    parser_5.add_argument('--skipem', dest='skip_em', default=False, action='store_true', help='Whether or not to use the EM algorithm during reference search')
     args = parser.parse_args()
     return args
 
@@ -325,7 +290,7 @@ def step4(bin_dir, cor_dir, logr_dir, rbin_dir, sample_name, index_tab, gender_f
     logger.info('generate_correlation done')
     # Original Step5 - get_references
     cmd5 = ['Rscript', '/resources/run.R', 'get_references', bin_dir,
-            cor_dir, logr_dir, sample_name, index_tab, gender_file, str(batch_size), str(cor_cut), skip_em]
+            cor_dir, logr_dir, sample_name, index_tab, gender_file, str(batch_size), str(cor_cut), str(skip_em)]
     logger.debug('CMD=' + " ".join(cmd5))
     run_cmd(cmd5)
     logger.info('get_references done')
@@ -358,7 +323,8 @@ def step5(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_f
     logger.info('Start step5')
     cmd7 = ['Rscript', '/resources/run.R',
             'run_hmm_rbin', rbin_dir, cor_dir, cnv_dir, sample_name, index_tab,
-            cov_file, gender_file, str(batch_size), str(cov_cut), str(cor_cut), skip_em]
+            cov_file, gender_file, str(batch_size), str(cov_cut), str(cor_cut), str(skip_em)]
+    print(cmd7)
     logger.debug('CMD | ' + " ".join(cmd7))
     run_cmd(cmd7)
     logger.info('Step5 done')
@@ -395,10 +361,10 @@ if __name__ == '__main__':
         sample_id = ix2id(
             args.sample_ix, args.gender_file) if args.sample_ix else args.sample_id
         step4(args.bin_dir, args.cor_dir, args.logr_dir, args.rbin_dir, sample_id,
-              args.index_tab, args.gender_file, args.batch_size, args.debug)
+              args.index_tab, args.gender_file, args.batch_size, args.cor_cut, args.skip_em, args.debug)
     elif args.step == 'step5':
         # step 5
         sample_id = ix2id(
             args.sample_ix, args.gender_file) if args.sample_ix else args.sample_id
         step5(args.rbin_dir, args.cor_dir, args.cnv_dir, sample_id,
-              args.index_tab, args.cov_file, args.gender_file, args.batch_size, args.debug)
+              args.index_tab, args.cov_file, args.gender_file, args.batch_size, args.cov_cut, args.cor_cut, args.skip_em, args.debug)
