@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="https://github.com/tf2/CNest/blob/master/src/fluff/cnv_logo.png" alt="Project logo"></a>
+ <img width=200px height=200px src="https://github.com/tf2/CNest/blob/master/src/fluff/cnv_logo.png" alt="Project logo" width="250" height="150"></a>
 </p>
 
 <h3 align="center">CNest Main Docs</h3>
@@ -8,15 +8,15 @@
 <div align="center">
 
   [![Status](https://img.shields.io/badge/status-active-success.svg)]() 
-  [![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/kylelobo/The-Documentation-Compendium/issues)
-  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/kylelobo/The-Documentation-Compendium/pulls)
+  [![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/tf2/CNest/issues)
+  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/tf2/CNest/pulls)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
 
 ---
 
-<p align="center"> Few lines describing your project.
+<p align="center"> CNest contains a suite of analysis tools for large scale copy number variation analysis from next generation (NGS) sequencing data.
     <br> 
 </p>
 
@@ -41,9 +41,9 @@ Add additional notes about how to deploy this on a live system.
 - [WDL](https://github.com/openwdl/wdl) - workflow
 
 ## ✍️ Authors <a name = "authors"></a>
-- [@tf2](https://github.com/tf2) - Idea & Initial work and method development
+- [@tf2](https://github.com/tf2) - Idea, initial work and method development
 - [@smshuai](https://github.com/smshuai) - Method development and Nextflow implementation
-
+- [@bshifaw](https://github.com/bshifaw) - WDL implementation
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
 - Hat tip to anyone whose code was used
