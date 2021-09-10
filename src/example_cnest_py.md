@@ -3,7 +3,7 @@
 To run `CNest`, either singularity or docker can be used.
 Below you can find examples to run each step with singularity or docker. 
 
-Alternatively, if you have many samples, you can simply use our [Nextflow pipeline](https://github.com/smshuai/CNest-nf) to run across all samples on a HPC environment with job scheduler like SLURM (`sbatch`) or LSF (`bsub`) etc., or a cloud environment supporting Nextflow.
+Alternatively, if you have many samples, you can simply use our [Nextflow pipeline](https://github.com/smshuai/CNest-nf) or [WDL](https://github.com/tf2/CNest/cnest-wdl)to run across all samples on a HPC environment with job scheduler like SLURM (`sbatch`) or LSF (`bsub`) etc., or a cloud environment supporting Nextflow or WDL.
 
 ## Using Singularity
 ### Getting help
