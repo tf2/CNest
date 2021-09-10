@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="https://i.imgur.com/6wj0hh6.jpg" alt="Project logo"></a>
+ <img width=200px height=200px src="https://github.com/tf2/CNest/blob/master/src/fluff/cnv_logo.png" alt="Project logo"></a>
 </p>
 
 <h3 align="center">CNest Main Docs</h3>
@@ -23,7 +23,6 @@
 ## 📝 Table of Contents
 - [About](#about)
 - [Usage](#usage)
-- [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
 - [Acknowledgments](#acknowledgement)
 
@@ -37,15 +36,14 @@ Add notes about how to use the system.
 Add additional notes about how to deploy this on a live system.
 
 ## ⛏️ Built Using <a name = "built_using"></a>
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Express](https://expressjs.com/) - Server Framework
-- [VueJs](https://vuejs.org/) - Web Framework
-- [NodeJs](https://nodejs.org/en/) - Server Environment
+- [Docker](https://docs.docker.com/) - build
+- [Nextflow](https://www.nextflow.io/) - workflow
+- [WDL](https://github.com/openwdl/wdl) - workflow
 
 ## ✍️ Authors <a name = "authors"></a>
-- [@kylelobo](https://github.com/kylelobo) - Idea & Initial work
+- [@tf2](https://github.com/tf2) - Idea & Initial work and method development
+- [@smshuai](https://github.com/smshuai) - Method development and Nextflow implementation
 
-See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project.
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
 - Hat tip to anyone whose code was used
