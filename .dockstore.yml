@@ -1,0 +1,18 @@
+version: 1.2
+workflows:
+   - name: cnest-part0
+     subclass: WDL
+     primaryDescriptorPath: /wdl/cnest-part0.wdl
+   - name: cnest-part1
+     subclass: WDL
+     primaryDescriptorPath: /wdl/cnest-part1.wdl
+   - name: cnest-part2
+     subclass: WDL
+     primaryDescriptorPath: /wdl/cnest-part2.wdl
+   - name: cnest-part3
+     subclass: WDL
+     primaryDescriptorPath: /wdl/cnest-part3.wdl
+   - name: cnest-part4
+     subclass: WDL
+     primaryDescriptorPath: /wdl/cnest-part4.wdl
+
