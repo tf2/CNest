@@ -9,17 +9,17 @@ Alternatively, if you have many samples, you can simply use our [Nextflow pipeli
 ### Getting help
 ```bash
 # Tested on singularity version 3.5.0 and 3.7.0-1.el7
-singularity pull docker://smshuai/cnest:dev2
+singularity pull docker://tomas81/cnest:dev
 # Show help of available commands
-singularity run docker://smshuai/cnest:dev2 -h
+singularity run docker://tomas81/cnest:dev -h
 # Show help for a given step
-singularity run docker://smshuai/cnest:dev2 step2 -h
+singularity run docker://tomas81/cnest:dev step2 -h
 ```
 
 ### Run Step1
 ```bash
 singularity run -B "${index_path}:/input,${output_path}:/output" --pwd "/output/" \
-    docker://smshuai/cnest:dev2 step1 \
+    docker://tomas81/cnest:dev step1 \
     --project $project_name \
     --bed "/input/$index_bed"
 ```
@@ -28,21 +28,21 @@ singularity run -B "${index_path}:/input,${output_path}:/output" --pwd "/output/
 ```bash
 # BAM
 singularity run -B "${input_path}:/input,${output_path}:/output" --pwd /output/ \
-    docker://smshuai/cnest:dev step2 \
+    docker://tomas81/cnest:dev step2 \
     --project 'test_proj' \
     --sample 'test_bam' \
     --input '/input/test.bam'
 
 # CRAM (Need to mount ref path)
 singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref" --pwd /output/ \
-    docker://smshuai/cnest:dev step2 \
+    docker://tomas81/cnest:dev step2 \
     --project $project_name \
     --sample $sample_name \
     --input "/input/$cram_name"
 
 # CRAM (fast mode)
 singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref" --pwd /output/ \
-    docker://smshuai/cnest:dev step2 \
+    docker://tomas81/cnest:dev step2 \
     --project $project_name \
     --sample $sample_name \
     --input "/input/$cram_name" \
@@ -53,7 +53,7 @@ singularity run -B "${input_path}:/input,${output_path}:/output,${ref_path}:/ref
 ### Run Step3
 ```bash
 singularity run -B "${output_path}:/output" --pwd "/output/" \
-    docker://smshuai/cnest:dev step3 \
+    docker://tomas81/cnest:dev step3 \
     --project $project_name
 ```
 
@@ -66,7 +66,7 @@ logr_dir=$project_name/logr
 rbin_dir=$project_name/rbin
 gender_file=$project_name/gender_classification.txt
 singularity run -B "${output_path}:/output" --pwd "/output/" \
-    docker://smshuai/cnest:dev2 step4 \
+    docker://tomas81/cnest:dev step4 \
     --indextab $index_tab \
     --bindir $bin_dir \
     --cordir $cor_dir \
@@ -87,7 +87,7 @@ rbin_dir=$project_name/rbin
 gender_file=$project_name/gender_classification.txt
 cov_file=$project_name/mean_coverage.txt
 singularity run -B "${output_path}:/output" --pwd "/output/" \
-    docker://smshuai/cnest:dev2 step5 \
+    docker://tomas81/cnest:dev step5 \
     --indextab $index_tab \
     --rbindir $rbin_dir \
     --cordir $cor_dir \
@@ -102,16 +102,16 @@ singularity run -B "${output_path}:/output" --pwd "/output/" \
 ### Getting help
 ```bash
 # Show help of available commands
-docker run -it --rm smshuai/cnest:dev2 -h
+docker run -it --rm tomas81/cnest:dev -h
 # Show help for a given step
-docker run -it --rm smshuai/cnest:dev2 step2 -h
+docker run -it --rm tomas81/cnest:dev step2 -h
 ```
 
 ### Run Step1
 Note: `index.bed` must have the same chromosome names as the BAM/CRAM file.
 ```bash
 docker run -v "${index_path}:/input" -v "${output_path}:/output" -w "/output" -it --rm \
-    smshuai/cnest:dev2 step1 \
+    tomas81/cnest:dev step1 \
     --project test_proj \
     --bed /wkdir/index.bed
 ```
@@ -120,21 +120,21 @@ docker run -v "${index_path}:/input" -v "${output_path}:/output" -w "/output" -i
 ```bash
 # BAM
 docker run -v "${input_path}:/input" -v "${output_path}:/output" -w "/output" -it --rm \
-    smshuai/cnest:dev2 step2 \
+    tomas81/cnest:dev step2 \
     --project test_proj \
     --sample 'test_bam' \
     --input '/input/test.bam'
 
 # CRAM (Need to mount ref path)
 docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}:/ref" -w "/output" -it --rm \
-    smshuai/cnest:dev2 step2 \
+    tomas81/cnest:dev step2 \
     --project test_proj \
     --sample 'test_cram' \
     --input '/input/test.cram'
 
 # CRAM fast mode
 docker run -v "${input_path}:/input" -v "${output_path}:/output" -v "${ref_path}:/ref" -w "/output" -it --rm \
-    smshuai/cnest:dev2 step2 \
+    tomas81/cnest:dev step2 \
     --project test_proj \
     --sample 'test_cram' \
     --input '/input/test.cram' \
@@ -150,7 +150,7 @@ qc_file=$project_name/gender_qc.txt
 gender_file=$project_name/gender_classification.txt
 cov_file=$project_name/mean_coverage.txt
 docker run -v "${output_path}:/output" -w "/output" -it --rm \
-    smshuai/cnest:dev2 step3 \
+    tomas81/cnest:dev step3 \
     --indextab $index_tab \
     --bindir $bin_dir \
     --qc $qc_file \
@@ -167,7 +167,7 @@ logr_dir=$project_name/logr
 rbin_dir=$project_name/rbin
 gender_file=$project_name/gender_classification.txt
 docker run -v "${output_path}:/output" -w "/output" -it --rm \
-    smshuai/cnest:dev2 step4 \
+    tomas81/cnest:dev step4 \
     --indextab $index_tab \
     --bindir $bin_dir \
     --cordir $cor_dir \
@@ -188,7 +188,7 @@ rbin_dir=$project_name/rbin
 gender_file=$project_name/gender_classification.txt
 cov_file=$project_name/mean_coverage.txt
 docker run -v "$PWD:$PWD" -w "$PWD" -it --rm \
-    smshuai/cnest:dev2 step5 \
+    tomas81/cnest:dev step5 \
     --indextab $index_tab \
     --rbindir $rbin_dir \
     --cordir $cor_dir \
