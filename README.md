@@ -11,7 +11,7 @@
   <p align="center">
     Docker Implementation for CNest - Detection and Genome Wide Association Testing 
     <br />
-    <a href="https://github.com/tf2/src/fluff/main_docs.md"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/tf2/CNest/blob/master/src/fluff/main_docs.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/github_username/repo_name">View Demo</a>
