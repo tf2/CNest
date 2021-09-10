@@ -16,7 +16,7 @@
 
 ---
 
-<p align="center"> CNest contains a suite of analysis tools for large scale copy number variation analysis from next generation (NGS) sequencing data.
+<p align="center"> Analysis Methods and Workflows for Large Scale Copy Number Variation Analysis from Next Generation (NGS) Sequencing Data.
     <br> 
 </p>
 
@@ -27,7 +27,10 @@
 - [Acknowledgments](#acknowledgement)
 
 ## 🧐 About <a name = "about"></a>
-Write about 1-2 paragraphs describing the purpose of your project.
+CNest contains methods that have been speifically developed for large scale analysis of copy number from NGS data. It primarily uses read depth (coverage) information to generate robust copy number estimates for individual samples and is most approprate for use in very large cohorts (minimum of 1000 samples). It uses a 'dynamic' reference based approach to generate copy number estimates where a the predicted set of ideal internal samples are using to generate a dynamic baseline across the genome for every sample meaning that each sample has a different reference containing different baseline coverage levels for all target regions across the genome. During this process the reference datasets are selected to minimise several noise characteristics including the presence and scale of 'genome waves' and an optimisation of the dose response. The number of samples that make up each individual reference can be set at a fixed level (recommended) or derived dynamically for each sample independantly (development).
+
+CNest also includes 
+
 
 ## 🎈 Usage <a name="usage"></a>
 Add notes about how to use the system.
