@@ -54,7 +54,7 @@ task step0 {
   }
     
   runtime{
-    docker: "quay.io/smshuai/cnest:dev2"
+    docker: "tomas81/cnest:dev"
   }
 }
 
@@ -78,7 +78,7 @@ task step1 {
   }
     
   runtime{
-    docker: "quay.io/smshuai/cnest:dev2"
+    docker: "tomas81/cnest:dev"
   }
 }
 
