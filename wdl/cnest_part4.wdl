@@ -32,6 +32,7 @@ workflow CnestWorkflow {
         index = index,
         gender = gender,
         batch = batch,
+        wgs = wgs,
         sample_name = sample_name,
         cor_cut = cor_cut,
         cov_cut = cov_cut,
