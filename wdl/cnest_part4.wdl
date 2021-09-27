@@ -43,8 +43,8 @@ workflow CnestWorkflow {
   }
 
   output {
-    Array[File] out_cor = hmm_calls.mixed_calls
-    Array[File] out_logr = hmm_calls.mixed_stats
+    Array[File] mixed_calls = hmm_calls.mixed_calls
+    Array[File] mixed_stats = hmm_calls.mixed_stats
   }
 
 

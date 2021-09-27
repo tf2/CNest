@@ -61,7 +61,7 @@ task gender_qc {
   }
     
   runtime {
-    docker: "quay.io/smshuai/cnest:dev2"
+    docker: "tomas81/cnest:dev"
     preemptible: preemptible_tries
     disks: "local-disk " + disk_size + " HDD"
   }
