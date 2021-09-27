@@ -87,8 +87,8 @@ task step2 {
     Int preemptible_tries
   }
 
-  Float file_path_size = size(file_path, "GiB")
-  Float ch_ref_size = size(ch_ref, "GiB")
+  Float file_path_size = size(file_path, "GB")
+  Float ch_ref_size = size(ch_ref, "GB")
   # Sometimes the output is larger than the input, or a task can spill to disk.
   # In these cases we need to account for the input (1) and the output (1.5) or the input(1), the output(1), and spillage (.5).
   Float disk_multiplier = 2.5
