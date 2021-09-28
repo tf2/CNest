@@ -29,7 +29,7 @@ workflow CnestWorkflow {
     Int batch
     Int wgs = 1
     Float cor_cut = 0.9
-    Float cov_cut = 20
+    Int cov_cut = 20
     Boolean skipem = false
     
     Int part3_addtional_mem_gb = 0

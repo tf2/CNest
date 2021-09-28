@@ -12,7 +12,7 @@ workflow CnestWorkflow {
     Int batch
     Array[String] samples
     Float cor_cut = 0.9
-    Float cov_cut = 20
+    Int cov_cut = 20
     Boolean skipem = false
 
     Int wgs = 1
@@ -63,7 +63,7 @@ task hmm_calls {
     String sample_name 
     Int wgs
     Float cor_cut
-    Float cov_cut
+    Int cov_cut
     Boolean skipem
     
     Int addtional_disk_gb
