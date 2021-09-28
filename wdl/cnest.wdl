@@ -21,7 +21,6 @@ workflow CnestWorkflow {
     Array[File] bam_file
     Array[File] bai_file
     File ref
-    File indexb
   
     Boolean test = false
     
