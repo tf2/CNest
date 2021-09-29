@@ -6,13 +6,11 @@ workflow CnestWorkflow {
     String project
     File bedgz
   
-    Boolean test = false
   }
     
 
   call step0 {
     input:
-      test = test,
       bedgz = bedgz
   }
 
@@ -33,7 +31,6 @@ workflow CnestWorkflow {
 
 task step0 {
   input {
-    Boolean test
     File bedgz
     
   }
@@ -41,12 +38,7 @@ task step0 {
 
 
   command {
-    if [[ "~{test}" = "true" ]]
-    then
-      gzip -cd ~{bedgz} | head -1000 > ~{bed_name}
-    else
       gzip -cd ~{bedgz} > ~{bed_name}
-    fi
   }
     
   output{

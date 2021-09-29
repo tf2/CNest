@@ -22,8 +22,6 @@ workflow CnestWorkflow {
     Array[File] bai_file
     File ref
   
-    Boolean test = false
-    
     #part3 and part 4
     Int batch
     Int wgs = 1
@@ -38,7 +36,6 @@ workflow CnestWorkflow {
   
     call CnestPart0.step0 {
     input:
-      test = test,
       bedgz = bedgz
   }
 
@@ -51,7 +48,6 @@ workflow CnestWorkflow {
   scatter (i in range(length(samples))) {
       call CnestPart1.step2 {
         input:
-          test = test,
           project = project,
           name = samples[i],
           file_path = bam_file[i],
