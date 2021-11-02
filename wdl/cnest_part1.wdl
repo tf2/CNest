@@ -9,8 +9,6 @@ workflow CnestWorkflow {
     File ref
     File indexb
   
-    Boolean test = false
-    
     Int preemptible_tries = 3
   }
     
@@ -33,7 +31,6 @@ workflow CnestWorkflow {
   #  if (sample[0] != "name") { #Used to skip header
   #    call step2 {
   #      input:
-  #        test = test,
   #        project = project,
   #        name = sample[0],
   #        file_path = sample[1],
@@ -47,7 +44,6 @@ workflow CnestWorkflow {
   scatter (i in range(length(sample_name))) {
       call step2 {
         input:
-          test = test,
           project = project,
           name = sample_name[i],
           file_path = bam_file[i],
@@ -78,7 +74,6 @@ task step2 {
   input {
     String project
     String name
-    Boolean test
     File file_path
     File file_path_index
     File ch_ref
@@ -87,8 +82,8 @@ task step2 {
     Int preemptible_tries
   }
 
-  Float file_path_size = size(file_path, "GiB")
-  Float ch_ref_size = size(ch_ref, "GiB")
+  Float file_path_size = size(file_path, "GB")
+  Float ch_ref_size = size(ch_ref, "GB")
   # Sometimes the output is larger than the input, or a task can spill to disk.
   # In these cases we need to account for the input (1) and the output (1.5) or the input(1), the output(1), and spillage (.5).
   Float disk_multiplier = 2.5
@@ -103,12 +98,7 @@ task step2 {
     export INDEX_DIR=$(readlink -f ~{file_path_index} | xargs dirname)
     mv ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
     
-    if [[ "~{test}" = "true" ]]
-    then
-      cnest.py --debug step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
-    else
-      cnest.py step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
-    fi
+    cnest.py step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
   }
     
   output {
