@@ -115,10 +115,11 @@ RUN rm -rf /$CNV_APP /Rbin_1.1.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /ht
 RUN mkdir -p /resources/ /input/ /output/ /ref/
 ENV REF_PATH=/ref/%2s/%2s/%s
 
-COPY src/run src/run.R src/cnest.py /resources/
+COPY src/run src/run.R src/cnest.py src/cnest_dev.py /resources/
 RUN chmod +x /resources/cnest.py
+RUN chmod +x /resources/cnest_dev.py
 
-ENTRYPOINT ["python3.8", "/resources/cnest.py"]
+ENTRYPOINT ["python3.8", "/resources/cnest_dev.py"]
 
 ########################################################################
 # Run Notes:
