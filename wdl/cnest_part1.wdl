@@ -96,7 +96,7 @@ task step2 {
     cp  ~{ch_index_bed} ./~{project}/index.bed
     
     export INDEX_DIR=$(readlink -f ~{file_path_index} | xargs dirname)
-    mv ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
+    mv -f ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
     
     cnest.py step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
   }
