@@ -95,7 +95,7 @@ task step2 {
     mkdir -p ~{project}/tmp/ ~{project}/bin/
     cp  ~{ch_index_bed} ./~{project}/index.bed
     
-    export INDEX_DIR=$(readlink -f ~{file_path_index} | xargs dirname)
+    export INDEX_DIR=$(readlink -f ~{file_path} | xargs dirname)
     if [ ~{file_path_index} != $INDEX_DIR/~{basename(file_path)}.bai ]
     then
       mv ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
