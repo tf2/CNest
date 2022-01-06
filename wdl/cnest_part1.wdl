@@ -95,7 +95,7 @@ task step2 {
     mkdir -p ~{project}/tmp/ ~{project}/bin/
     cp  ~{ch_index_bed} ./~{project}/index.bed
     
-    export INDEX_DIR=$(readlink -f ~{file_path} | xargs dirname)
+    export INDEX_DIR=$(readlink -f ~{file_path_index} | xargs dirname)
     if [ ~{file_path_index} != $INDEX_DIR/~{basename(file_path)}.bai ]
     then
       mv ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
@@ -121,6 +121,12 @@ task tarzip_bins {
     String project
     
   }
+  
+  Float list_of_bins_size = size(list_of_bins, "G")
+  Float disk_multiplier = 2.5
+  Int disk_size = ceil(disk_multiplier * list_of_bins_size) + 20
+
+  
   command {
     mkdir ~{project}_bindir
     echo "~{sep='\n' list_of_bins}" > bin.txt
@@ -136,6 +142,7 @@ task tarzip_bins {
     
   runtime {
     docker: "tomas81/cnest:dev"
+    disks: "local-disk " + disk_size + " HDD"
   }
 }
 
