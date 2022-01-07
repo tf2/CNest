@@ -102,6 +102,9 @@ task step2 {
     then
       mv ~{file_path_index} $INDEX_DIR/$SAMPLE_NAME.bai
     fi
+    
+    echo List contents in $INDEX_DIR
+    ls $INDEX_DIR
 
     cnest.py step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
   }
