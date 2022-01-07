@@ -95,10 +95,12 @@ task step2 {
     mkdir -p ~{project}/tmp/ ~{project}/bin/
     cp  ~{ch_index_bed} ./~{project}/index.bed
     
+    # cnest is expecting index name to be  bam_name.bai and stored in the same directory as bam file
     export INDEX_DIR=$(readlink -f ~{file_path} | xargs dirname)
-    if [ ~{file_path_index} != $INDEX_DIR/~{basename(file_path)}.bai ]
+    export SAMPLE_NAME=~{basename(file_path, ".bam")}
+    if [ ~{file_path_index} != $INDEX_DIR/$SAMPLE_NAME.bai ]
     then
-      mv ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
+      mv ~{file_path_index} $INDEX_DIR/$SAMPLE_NAME.bai
     fi
 
     cnest.py step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
