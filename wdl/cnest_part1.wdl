@@ -97,7 +97,7 @@ task step2 {
     
     # cnest is expecting index name to be  bam_name.bai and stored in the same directory as bam file
     export INDEX_DIR=$(readlink -f ~{file_path} | xargs dirname)
-    export SAMPLE_NAME=~{basename(file_path, ".bam")}
+    export SAMPLE_NAME=~{basename(file_path)}
     if [ ~{file_path_index} != $INDEX_DIR/$SAMPLE_NAME.bai ]
     then
       mv ~{file_path_index} $INDEX_DIR/$SAMPLE_NAME.bai
