@@ -95,9 +95,17 @@ task step2 {
     mkdir -p ~{project}/tmp/ ~{project}/bin/
     cp  ~{ch_index_bed} ./~{project}/index.bed
     
-    export INDEX_DIR=$(readlink -f ~{file_path_index} | xargs dirname)
-    mv ~{file_path_index} $INDEX_DIR/~{basename(file_path)}.bai
+    # cnest is expecting index name to be  bam_name.bai and stored in the same directory as bam file
+    export INDEX_DIR=$(readlink -f ~{file_path} | xargs dirname)
+    export SAMPLE_NAME=~{basename(file_path)}
+    if [ ~{file_path_index} != $INDEX_DIR/$SAMPLE_NAME.bai ]
+    then
+      mv ~{file_path_index} $INDEX_DIR/$SAMPLE_NAME.bai
+    fi
     
+    echo List contents in $INDEX_DIR
+    ls $INDEX_DIR
+
     cnest.py step2 --project ~{project} --sample ~{name} --input ~{file_path} --fasta ~{ch_ref} --fast
   }
     
@@ -118,6 +126,12 @@ task tarzip_bins {
     String project
     
   }
+  
+  Float list_of_bins_size = size(list_of_bins, "G")
+  Float disk_multiplier = 2.5
+  Int disk_size = ceil(disk_multiplier * list_of_bins_size) + 20
+
+  
   command {
     mkdir ~{project}_bindir
     echo "~{sep='\n' list_of_bins}" > bin.txt
@@ -133,6 +147,7 @@ task tarzip_bins {
     
   runtime {
     docker: "tomas81/cnest:dev"
+    disks: "local-disk " + disk_size + " HDD"
   }
 }
 
