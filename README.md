@@ -96,7 +96,7 @@ Project Link: [https://github.com/tf2/CNest](https://github.com/tf2/CNest)
 ## Acknowledgements
 * Ewan Birney - [@ewanbirney](https://twitter.com/ewanbirney)
 * Shimin Shuai
-
+* Beri Shifaw
 
 
 
