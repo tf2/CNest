@@ -14,7 +14,7 @@
     <a href="https://github.com/tf2/CNest/blob/master/src/fluff/main_docs.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://app.terra.bio/#workspaces/ga4gh-cnest-test/cnest-terra">View Demo</a>
   </p>
 </p>
 
