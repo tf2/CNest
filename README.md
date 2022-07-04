@@ -14,7 +14,7 @@
     <a href="https://github.com/tf2/CNest/blob/master/src/fluff/main_docs.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://app.terra.bio/#workspaces/ga4gh-cnest-test/cnest-terra">View Demo</a>
+    <a href="https://app.terra.bio/#workspaces/ga4gh-cnest-test/cnest-terra">View WDL Demo on Terra.bio</a>
   </p>
 </p>
 
