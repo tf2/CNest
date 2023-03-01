@@ -341,12 +341,41 @@ generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
 		   		"PACKAGE" = "Rbin"
 				)$values
 	}
+	rr_mat = rr_mat[index$V1<23,]
 	colnames(rr_mat) = basename(filenames)
 	cor_mat = cor(rr_mat)
 	# TODO: output to each file
-	dataset = data.frame(filenames, co)
-	write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
+	for(x in 1:ncol(cor_mat)) {
+		dataset = data.frame(rownames(cor_mat, cor_mat[,x]))
+		write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
+	}
 }
+
+generate_correlation_batch <- function(bin_dir, cor_dir, batch_size, start_pos, index_file) {
+	# read everything in batches - ideally this should be everything and require big mem
+	index = read.table(index_file)
+	filenames = dir(bin_dir, full.names=TRUE)
+	filenames = filenames[start_pos:(start_pos+batch_size)]
+	rr_mat = matrix(0, nrow=nrow(index), ncol=length(filenames))
+	for(x in 1:length(filenames)) {
+		rr_mat[, x] = .C( "getValues",
+				"filename" = filenames[x],
+		 		"start_position" = as.double(0), 
+		  		"number_row_to_read" =as.integer(nrow(index)),
+		   		"values" = as.double(1:nrow(index)),
+		   		"PACKAGE" = "Rbin"
+				)$values
+	}
+	rr_mat = rr_mat[index$V1<23,]
+	colnames(rr_mat) = basename(filenames)
+	cor_mat = cor(rr_mat)
+	for(x in 1:ncol(cor_mat)) {
+		dataset = data.frame(rownames(cor_mat), cor_mat[,x])
+		cor_file = paste0(cor_dir, "/", colnames(cor_mat)[x])
+		write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
+	}
+}
+
 
 ## This function returns sample_names based on type (mixed, matched and mismatched)
 ## Will be used in get_references() and run_hmm_rbin()
