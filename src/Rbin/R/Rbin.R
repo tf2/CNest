@@ -327,30 +327,6 @@ generate_correlation <- function(bin_dir, cor_dir, sample_name, index_file) {
 	write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
 }
 
-generate_correlation_fast <- function(bin_dir, cor_dir, index_file) {
-	# read everything only once but require big mem
-	index = read.table(index_file)
-	filenames = dir(bin_dir, full.names=TRUE)
-	rr_mat = matrix(0, nrow=nrow(index), ncol=length(filenames))
-	for(x in 1:length(filenames)) {
-		rr_mat[, x] = .C( "getValues",
-				"filename" = filenames[x],
-		 		"start_position" = as.double(0), 
-		  		"number_row_to_read" =as.integer(nrow(index)),
-		   		"values" = as.double(1:nrow(index)),
-		   		"PACKAGE" = "Rbin"
-				)$values
-	}
-	rr_mat = rr_mat[index$V1<23,]
-	colnames(rr_mat) = basename(filenames)
-	cor_mat = cor(rr_mat)
-	# TODO: output to each file
-	for(x in 1:ncol(cor_mat)) {
-		dataset = data.frame(rownames(cor_mat, cor_mat[,x]))
-		write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
-	}
-}
-
 generate_correlation_batch <- function(bin_dir, cor_dir, batch_size, start_pos, index_file) {
 	# read everything in batches - ideally this should be everything and require big mem
 	index = read.table(index_file)
@@ -375,6 +351,44 @@ generate_correlation_batch <- function(bin_dir, cor_dir, batch_size, start_pos, 
 		write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
 	}
 }
+
+generate_correlation_chunk <- function(bin_dir, cor_dir, target_size, start_pos, index_file) {
+    # read chunks of samples as targets - then generate correlation against all samples
+    index = read.table(index_file)
+    filenames = dir(bin_dir, full.names=TRUE)
+    target_files = filenames[start_pos:(start_pos+target_size)-1]
+    rr_mat1 = matrix(0, nrow=nrow(index), ncol=length(target_files))
+    for(x in 1:length(target_files)) {
+        rr_mat1[, x] = .C( "getValues",
+                "filename" = target_files[x],
+                 "start_position" = as.double(0),
+                  "number_row_to_read" =as.integer(nrow(index)),
+                   "values" = as.double(1:nrow(index)),
+                   "PACKAGE" = "Rbin"
+                )$values
+    }
+    rr_mat1 = rr_mat1[index$V1<23,]
+    cc_mat = matrix(0, nrow=nrow(filenames), ncol=length(target_files))
+    for(x in 1:length(filenames)) {
+        rr2= .C( "getValues",
+                "filename" = filenames[x],
+                 "start_position" = as.double(0),
+                  "number_row_to_read" =as.integer(nrow(index)),
+                   "values" = as.double(1:nrow(index)),
+                   "PACKAGE" = "Rbin"
+                )$values
+        rr2 = rr2[index$V1<23]
+        cc_mat[x,] = cor(rr_mat1, rr2)
+    }
+    colnames(cc_mat) = basename(target_files)
+    rownames(cc_mat) = basename(filenames)
+    for(x in 1:ncol(cc_mat)) {
+        dataset = data.frame(rownames(cc_mat), cc_mat[,x])
+        cor_file = paste0(cor_dir, "/", colnames(cc_mat)[x])
+        write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
+    }
+}
+
 
 
 ## This function returns sample_names based on type (mixed, matched and mismatched)
@@ -486,6 +500,87 @@ get_references <- function(sample_name, index_file, gender_file, logr_dir,
 
 	dat = data.frame(index, data, ref_med_cov, matched_med_cov, mismatched_med_cov)
 	write.table(dat, file=output_file, sep="\t", row.names=F, quote=F, col.names=F)
+}
+
+get_references_return <- function(sample_name, index_file, gender_file,
+                            cor_dir, bin_dir, batch_size = 1000, cor_cut = 0.9, skip_em=FALSE) {
+    get_sample <- function(filename, index) {
+    return(rr1= .C( "getValues",
+                "filename" = as.character(filename),
+                 "start_position" = as.double(0),
+                  "number_row_to_read" =as.integer(nrow(index)),
+                   "values" = as.double(1:nrow(index)),
+                   "PACKAGE" = "Rbin"
+                )$values)
+    }
+    mean_norm <- function(ref_filenames, index) {
+        sum_cov = rep(0, nrow(index))
+        for(x in 1:length(ref_filenames)) {
+            cov = get_sample(ref_filenames[x], index)
+            sum_cov = sum_cov + cov
+        }
+    return(sum_cov)
+    }
+    med_norm <- function(ref_filenames, index, index_file) {
+        meds = NULL
+        chrs = unique(index[,1])
+        for(x in 1:length(chrs)) {
+            r = RbinRead_aCGH(chrs[x], min(index[index[,1]==chrs[x],2]), max(index[index[,1]==chrs[x],3]), index_file, ref_filenames)
+            m = apply(r[,-(1:3)], 1, median)
+            meds = c(meds, m)
+        }
+    return(meds)
+    }
+
+    # bin_dir was called log2_path before
+    output_file = paste0(logr_dir, "/", sample_name)
+    sample_file = paste0(bin_dir, '/', sample_name)
+
+    index = read.table(index_file)
+    data = get_sample(sample_file, index)
+    
+    # ! Mean coverage was not used at the current version, so they are not calculated anymore
+    # Mixed ref
+    print('Mixed ref')
+    ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="mixed")
+    ref_filenames = paste0(bin_dir, '/', ref_samples)
+    # ref_mean_cov = mean_norm(ref_filenames, index)
+    ref_med_cov = med_norm(ref_filenames, index, index_file)
+    # Gender matched ref
+    print('Gender matched ref')
+    matched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="matched")
+    matched_ref_filenames = paste0(bin_dir, '/', matched_ref_samples)
+    # matched_mean_cov = mean_norm(matched_ref_filenames, index)
+    matched_med_cov = med_norm(matched_ref_filenames, index, index_file)
+    # Gender mismatched ref
+    print('Gender mismatched ref')
+    mismatched_ref_samples = get_ref_sample_names_by_type(sample_name, cor_dir, gender_file, batch_size, cor_cut, skip_em, type="mismatched")
+    mismatched_ref_filenames = paste0(bin_dir, '/', mismatched_ref_samples)
+    # mismatched_mean_cov = mean_norm(mismatched_ref_filenames, index)
+    mismatched_med_cov = med_norm(mismatched_ref_filenames, index, index_file)
+
+return(data.frame(index, data, ref_med_cov, matched_med_cov, mismatched_med_cov))
+}
+
+batch_get_references_to_rbin <- function(index_file, gender_file, rbin_dir,
+                                        cor_dir, bin_dir, batch_size = 1000, target_files_size, start_pos, cor_cut = 0.9, skip_em=FALSE) {
+    gens = read.table(gender_file, header=T)
+    sample_names =as.character(gens[start_pos:(start_pos-target_files_size)-1,1])
+    for(x in 1:length(sample_names)) {
+        sample_name = sample_names[x]
+        data = get_references_return(sample_name, index_file, gender_file, cor_dir, bin_dir, batch_size, cor_cut, skip_em)
+        tempfile = paste0(rbin_dir, "/", sample_name, ".tmp")
+        binfile = paste0(rbin_dir, "/", sample_name)
+        l = log2((data[,4]+1)/(data[,5]+1)) # log2(count/mix_median)
+        l1= l-median(l[data[,1]<23])
+        l = log2((data[,4]+1)/(data[,6]+1)) # log2(count/gender_match_median)
+        l2= l-median(l[data[,1]<23])
+        l = log2((data[,4]+1)/(data[,7]+1)) # log2(count/gender_mismatch_median)
+        l3 = l-median(l[data[,1]<23])
+        data = data.frame(data[,1:3], l1, l2, l3)
+        write.table(data, file=tempfile, sep="\t", row.names=F, col.names=F, quote=F)
+        rname = RbinConvert_exome_ratio(tempfile, binfile)
+    }
 }
 
 processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {

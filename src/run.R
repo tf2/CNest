@@ -59,6 +59,16 @@ if(args[1] == "generate_correlation_batch") {
 	print ("generate_correlation batch")
 }
 
+if(args[1] == "generate_correlation_chunk") {
+	bin_dir = args[2]  # path to all bin files
+	cor_dir = args[3] # output cor dir
+	target_size = as.numeric(as.character(args[4])) # size of target samples
+	start_pos = as.numeric(as.character(args[5])) # starting position in file list - should be chunked rel to batch_size
+	index_file = args[6] # index_tab.txt path
+	generate_correlation_chunk(bin_dir, cor_dir, target_size, start_pos, index_file)
+	print ("generate_correlation batch")
+}
+
 if(args[1] == "get_references") {
 	# ['Rscript', '/resources/run.R', 'get_references', bin_dir, cor_dir, logr_dir, sample_name, index_tab, gender_file, batch_size]
 	bin_dir = args[2]
@@ -76,6 +86,30 @@ if(args[1] == "get_references") {
         skip_em = FALSE
     }
 	get_references(sample_name, index_file, gender_file, logr_dir, cor_dir, bin_dir, batchsize, cor_cut, skip_em)
+	print ("get_references")
+}
+
+
+if(args[1] == "get_references_to_rbin") {
+	#index_file, gender_file, rbin_dir,cor_dir, bin_dir, batch_size = 1000, target_size, start_pos, cor_cut = 0.9, skip_em=FALSE
+	index_file = args[2]
+	gender_file = args[3]
+	rbin_dir = args[4]
+	cor_dir = args[5]
+	bin_dir = args[6]
+	batchsize = as.numeric(as.character(args[7]))
+	target_size = as.numeric(as.character(args[8]))
+	start_pos = as.numeric(as.character(args[9]))
+    cor_cut = as.numeric(as.character(args[10]))
+    skip_em = as.character(args[11])
+    if(skip_em=="True") {
+        skip_em = TRUE
+    } else {
+        skip_em = FALSE
+    }
+	batch_get_references_to_rbin(index_file, gender_file, rbin_dir,
+                                    	cor_dir, bin_dir, batchsize, 
+                                        target_size, start_pos, cor_cut, skip_em)
 	print ("get_references")
 }
 
