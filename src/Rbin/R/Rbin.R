@@ -389,6 +389,50 @@ generate_correlation_chunk <- function(bin_dir, cor_dir, target_size, start_pos,
     }
 }
 
+generate_correlation_chunk_batch <- function(bin_dir, cor_dir, target_size, batch_size, start_pos, index_file) {
+    # read chunks of samples as targets - then generate correlation against all samples
+    index = read.table(index_file)
+    filenames = dir(bin_dir, full.names=TRUE)
+    target_files = filenames[start_pos:((start_pos+target_size)-1)]
+    rr_mat1 = matrix(0, nrow=nrow(index), ncol=length(target_files))
+    for(x in 1:length(target_files)) {
+        rr_mat1[, x] = .C( "getValues",
+                "filename" = target_files[x],
+                 "start_position" = as.double(0),
+                  "number_row_to_read" =as.integer(nrow(index)),
+                   "values" = as.double(1:nrow(index)),
+                   "PACKAGE" = "Rbin"
+                )$values
+    }
+    rr_mat1 = rr_mat1[index$V1<23,]
+    cc_mat = matrix(0, nrow=length(filenames), ncol=length(target_files))
+    niter = ceiling(length(filenames)/batch_size)
+    for(x in 1:niter) {
+    	spos = x*batch_size-batch_size+1
+    	epos = min(c(spos+batch_size-1, length(filenames)))
+    	fnames = filenames[spos:epos]
+    	rr_mat2 = matrix(0, nrow=nrow(rr_mat1), ncol=length(fnames))
+    	for(y in 1:length(fnames)) {
+	        rr2= .C( "getValues",
+	                "filename" = fnames[y],
+	                 "start_position" = as.double(0),
+	                  "number_row_to_read" =as.integer(nrow(index)),
+	                   "values" = as.double(1:nrow(index)),
+	                   "PACKAGE" = "Rbin"
+	                )$values
+	        rr2 = rr2[index$V1<23]
+	        rr_mat2[,y] = rr2
+    	}
+		cc_mat[spos:epos,] = t(cor(rr_mat1, rr_mat2))
+    }
+    colnames(cc_mat) = basename(target_files)
+    rownames(cc_mat) = basename(filenames)
+    for(x in 1:ncol(cc_mat)) {
+        dataset = data.frame(rownames(cc_mat), cc_mat[,x])
+        cor_file = paste0(cor_dir, "/", colnames(cc_mat)[x])
+        write.table(dataset, file=cor_file, sep="\t", row.names=F, col.names=F, quote=F)
+    }
+}
 
 
 ## This function returns sample_names based on type (mixed, matched and mismatched)
