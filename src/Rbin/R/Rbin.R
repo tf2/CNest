@@ -609,7 +609,7 @@ return(data.frame(index, data, ref_med_cov, matched_med_cov, mismatched_med_cov)
 batch_get_references_to_rbin <- function(index_file, gender_file, rbin_dir,
                                         cor_dir, bin_dir, batch_size = 1000, target_files_size, start_pos, cor_cut = 0.9, skip_em=FALSE) {
     gens = read.table(gender_file, header=T)
-    sample_names =as.character(gens[start_pos:(start_pos-target_files_size)-1,1])
+    sample_names =as.character(gens[start_pos:((start_pos-target_files_size)-1),1])
     for(x in 1:length(sample_names)) {
         sample_name = sample_names[x]
         data = get_references_return(sample_name, index_file, gender_file, cor_dir, bin_dir, batch_size, cor_cut, skip_em)
