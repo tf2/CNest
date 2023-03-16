@@ -47,7 +47,8 @@ def get_args():
     parser_4.add_argument('--indextab', dest='index_tab', required=True, type=str, help='Index tab file from step1')
     parser_4.add_argument('--bindir', dest='bin_dir', required=True, type=str, help='Directory for all bin files from step2')
     parser_4.add_argument('--cordir', dest='cor_dir', required=True,  type=str, help='Directory for cor file [output]')
-    parser_4.add_argument('--tlen', dest='target_size', required=True, type=int, help='Maximum number of samples used as references')
+    parser_4.add_argument('--tlen', dest='target_size', required=True, type=int, help='Number sample to run as targets')
+    parser_4.add_argument('--batch', dest='batch_size', required=True, type=int, help='Batching parameter for matrix size')
     parser_4.add_argument('--spos', dest='start_pos', required=True, type=int, help='Starting position in sample list for batching')
     # step 5
     parser_5 = subparsers.add_parser('step5', help='Log2 ratio & Rbin generation')
@@ -195,13 +196,13 @@ def step3(bin_dir, index_tab, qc_file, gender_file, cov_file):
     logger.info('Step3 done')
 
 
-def step4(bin_dir, cor_dir, sample_name, index_tab, target_size, start_pos, debug):
+def step4(bin_dir, cor_dir, sample_name, index_tab, target_size, batch_size, start_pos, debug):
     """Sample correlation
     """
     logger.info('Start step4')
     # Original Step4 - generate_correlation
-    cmd4 = ['Rscript', '/resources/run.R', 'generate_correlation_chunk',
-            bin_dir, cor_dir, target_size, start_pos, index_tab]
+    cmd4 = ['Rscript', '/resources/run.R', 'generate_correlation_chunk_batch',
+            bin_dir, cor_dir, target_size, batch_size, start_pos, index_tab]
     logger.debug('CMD=' + " ".join(cmd4))
     run_cmd(cmd4)
     logger.info('generate_correlation_chunk done')

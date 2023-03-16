@@ -69,6 +69,17 @@ if(args[1] == "generate_correlation_chunk") {
 	print ("generate_correlation batch")
 }
 
+if(args[1] == "generate_correlation_chunk_batch") {
+	bin_dir = args[2]  # path to all bin files
+	cor_dir = args[3] # output cor dir
+	target_size = as.numeric(as.character(args[4])) # size of target samples
+	batch_size = as.numeric(as.character(args[5])) # size of target samples
+	start_pos = as.numeric(as.character(args[6])) # starting position in file list - should be chunked rel to batch_size
+	index_file = args[7] # index_tab.txt path
+	generate_correlation_chunk_batch(bin_dir, cor_dir, target_size, start_pos, index_file)
+	print ("generate_correlation_chunk_batch")
+}
+
 if(args[1] == "get_references") {
 	# ['Rscript', '/resources/run.R', 'get_references', bin_dir, cor_dir, logr_dir, sample_name, index_tab, gender_file, batch_size]
 	bin_dir = args[2]
