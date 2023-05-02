@@ -196,7 +196,7 @@ def step3(bin_dir, index_tab, qc_file, gender_file, cov_file):
     logger.info('Step3 done')
 
 
-def step4(bin_dir, cor_dir, sample_name, index_tab, target_size, batch_size, start_pos, debug):
+def step4(bin_dir, cor_dir, index_tab, target_size, batch_size, start_pos, debug):
     """Sample correlation
     """
     logger.info('Start step4')
@@ -276,10 +276,7 @@ if __name__ == '__main__':
         step3(args.bin_dir, args.index_tab, args.qc_file, args.gender_file, args.cov_file)
     elif args.step == 'step4':
         # step 4
-        sample_id = ix2id(
-            args.sample_ix, args.gender_file) if args.sample_ix else args.sample_id
-        step4(args.bin_dir, args.cor_dir, args.logr_dir, args.rbin_dir, sample_id,
-              args.index_tab, args.gender_file, args.batch_size, args.cor_cut, args.skip_em, args.debug)
+        step4(args.bin_dir, args.cor_dir, args.index_tab, args.batch_size, args.batch_size, args.start_pos, args.debug)
     elif args.step == 'step5':
         # step 5
         sample_id = ix2id(
