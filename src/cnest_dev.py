@@ -202,7 +202,7 @@ def step4(bin_dir, cor_dir, index_tab, target_size, batch_size, start_pos, debug
     logger.info('Start step4')
     # Original Step4 - generate_correlation
     cmd4 = ['Rscript', '/resources/run.R', 'generate_correlation_chunk_batch',
-            bin_dir, cor_dir, target_size, batch_size, start_pos, index_tab]
+            bin_dir, cor_dir, str(target_size), str(batch_size), str(start_pos), index_tab]
     logger.debug('CMD=' + " ".join(cmd4))
     run_cmd(cmd4)
     logger.info('generate_correlation_chunk done')
