@@ -76,7 +76,7 @@ if(args[1] == "generate_correlation_chunk_batch") {
 	batch_size = as.numeric(as.character(args[5])) # size of target samples
 	start_pos = as.numeric(as.character(args[6])) # starting position in file list - should be chunked rel to batch_size
 	index_file = args[7] # index_tab.txt path
-	generate_correlation_chunk_batch(bin_dir, cor_dir, target_size, start_pos, batch_size, index_file)
+	generate_correlation_chunk_batch(bin_dir, cor_dir, target_size, batch_size, start_pos, index_file)
 	print ("generate_correlation_chunk_batch")
 }
 
