@@ -209,15 +209,15 @@ def step4(bin_dir, cor_dir, index_tab, target_size, batch_size, start_pos, debug
     logger.info('Step4 done')
 
 
-def step5(bin_dir, cor_dir, rbin_dir, index_tab, gender_file, batch_size, target_size, start_pos, cor_cut, skip_em, debug):
+def step5 (index_tab, gender_file, rbin_dir, cor_dir, bin_dir, batch_size, target_size, start_pos, cor_cut, skip_em, debug):
     """Log2 ratio and Rbin - combined get references and process log ratio to rbin
     """
     logger.info('Start step5')
     #batch_get_references_to_rbin <- function(index_file, gender_file, rbin_dir,
     #                                    cor_dir, bin_dir, batch_size = 1000, target_size, 
     #                                    start_pos, cor_cut = 0.9, skip_em=FALSE) 
-    cmd5 = ['Rscript', '/resources/run.R', 'get_references_to_rbin', index_file,
-            cor_dir, logr_dir, sample_name, index_tab, gender_file, str(batch_size), str(cor_cut), str(skip_em)]
+    cmd5 = ['Rscript', '/resources/run.R', 'get_references_to_rbin',
+            index_tab, gender_file, rbin_dir, cor_dir, bindir, str(batch_size), str(target_size), str(start_pos), str(cor_cut), str(skip_em)]
     logger.debug('CMD=' + " ".join(cmd5))
     run_cmd(cmd5)
     logger.info('get_references_to_rbin done')
@@ -279,7 +279,4 @@ if __name__ == '__main__':
         step4(args.bin_dir, args.cor_dir, args.index_tab, args.batch_size, args.batch_size, args.start_pos, args.debug)
     elif args.step == 'step5':
         # step 5
-        sample_id = ix2id(
-            args.sample_ix, args.gender_file) if args.sample_ix else args.sample_id
-        step5(args.rbin_dir, args.cor_dir, args.cnv_dir, sample_id,
-              args.index_tab, args.cov_file, args.gender_file, args.batch_size, args.cov_cut, args.cor_cut, args.skip_em, args.debug)
+        step5(args.index_tab, args.gender_file, args.rbin_dir, args.cor_dir, args.bin_dir, args.batch_size, args.target_size, args.start_pos, args.cor_cut, args.skip_em, args.debug)
