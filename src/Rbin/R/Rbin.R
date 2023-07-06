@@ -577,7 +577,6 @@ get_references_return <- function(sample_name, index_file, gender_file,
     }
 
     # bin_dir was called log2_path before
-    output_file = paste0(logr_dir, "/", sample_name)
     sample_file = paste0(bin_dir, '/', sample_name)
 
     index = read.table(index_file)
@@ -650,6 +649,7 @@ processLogRtoBin <- function(logr_dir, rbin_dir, sample_name) {
 	data = data.frame(data[,1:3], l1, l2, l3)
 	write.table(data, file=tempfile, sep="\t", row.names=F, col.names=F, quote=F)
 	rname = RbinConvert_exome_ratio(tempfile, binfile)
+	system(paste("rm ", rname$inputname, seo=""))
 }
 
 run_hmm_rbin <- function(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size=1000, cov_cut = 20, cor_cut = 0.9, skip_em=FALSE) {
