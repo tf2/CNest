@@ -18,6 +18,7 @@ generate_correlation_chunk_batch,
 get_references,
 get_ref_sample_names_by_type,
 batch_get_references_to_rbin,
+get_references_return,
 processLogRtoBin,
 run_hmm_rbin
 )
