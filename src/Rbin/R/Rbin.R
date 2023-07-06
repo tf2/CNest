@@ -623,6 +623,7 @@ batch_get_references_to_rbin <- function(index_file, gender_file, rbin_dir,
         data = data.frame(data[,1:3], l1, l2, l3)
         write.table(data, file=tempfile, sep="\t", row.names=F, col.names=F, quote=F)
         rname = RbinConvert_exome_ratio(tempfile, binfile)
+        system(paste("rm ", rname$inputname, sep=""))
     }
 }
 
