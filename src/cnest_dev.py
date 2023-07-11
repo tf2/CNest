@@ -217,7 +217,7 @@ def step5 (index_tab, gender_file, rbin_dir, cor_dir, bin_dir, batch_size, targe
     #                                    cor_dir, bin_dir, batch_size = 1000, target_size, 
     #                                    start_pos, cor_cut = 0.9, skip_em=FALSE) 
     cmd5 = ['Rscript', '/resources/run.R', 'get_references_to_rbin',
-            index_tab, gender_file, rbin_dir, cor_dir, bindir, str(batch_size), str(target_size), str(start_pos), str(cor_cut), str(skip_em)]
+            index_tab, gender_file, rbin_dir, cor_dir, bin_dir, str(batch_size), str(target_size), str(start_pos), str(cor_cut), str(skip_em)]
     logger.debug('CMD=' + " ".join(cmd5))
     run_cmd(cmd5)
     logger.info('get_references_to_rbin done')
