@@ -215,13 +215,15 @@ def step5 (index_tab, gender_file, rbin_dir, cor_dir, bin_dir, batch_size, targe
     logger.info('Start step5')
     #batch_get_references_to_rbin <- function(index_file, gender_file, rbin_dir,
     #                                    cor_dir, bin_dir, batch_size = 1000, target_size, 
-    #                                    start_pos, cor_cut = 0.9, skip_em=FALSE) 
-    cmd5 = ['Rscript', '/resources/run.R', 'get_references_to_rbin',
-            index_tab, gender_file, rbin_dir, cor_dir, bin_dir, str(batch_size), str(target_size), str(start_pos), str(cor_cut), str(skip_em)]
-    logger.debug('CMD=' + " ".join(cmd5))
-    run_cmd(cmd5)
-    logger.info('get_references_to_rbin done')
-    logger.info('Step5 done')
+    #                                    start_pos, cor_cut = 0.9, skip_em=FALSE)
+    for i in range(start_pos, start_pos+target_size):
+        cmd5 = ['Rscript', '/resources/run.R', 'get_references_to_rbin',
+                index_tab, gender_file, rbin_dir, cor_dir, bin_dir, str(batch_size), str(1), str(i), str(cor_cut), str(skip_em)]
+        print(cmd5)
+        logger.debug('CMD=' + " ".join(cmd5))
+        run_cmd(cmd5)
+        logger.info('get_references_to_rbin done')
+        logger.info('Step5 done')
 
 
 def step6(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, cov_cut, cor_cut, skip_em, debug):
