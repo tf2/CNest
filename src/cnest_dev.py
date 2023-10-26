@@ -76,6 +76,8 @@ def get_args():
     parser_6.add_argument('--covc', dest='cov_cut', default=20, type=int, help='Minimum mean coverage of targets to include in HMM calls')
     parser_6.add_argument('--cor', dest='cor_cut', default="0.9", type=str, help='Minimum similarity measure for defining references')
     parser_6.add_argument('--skipem', dest='skip_em', default=False, action='store_true', help='Whether or not to use the EM algorithm during reference search')
+    parser_6.add_argument('--tlen', dest='target_size', required=True, type=int, help='Size of the target sample list')
+    parser_6.add_argument('--spos', dest='start_pos', required=True, type=int, help='Starting position in sample list for batching')
 
     args = parser.parse_args()
     return args
@@ -227,7 +229,7 @@ def step5 (index_tab, gender_file, rbin_dir, cor_dir, bin_dir, batch_size, targe
     logger.info('Step5 done')
 
 
-def step6(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, cov_cut, cor_cut, skip_em, debug):
+def step6(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, target_size, start_pos, cov_cut, cor_cut, skip_em, debug):
     """HMM Call
         # Original Step7
         Rscript /resources/run.R run_hmm_rbin ${project_root} ${sample_index} \
