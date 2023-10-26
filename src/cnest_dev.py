@@ -229,7 +229,7 @@ def step5 (index_tab, gender_file, rbin_dir, cor_dir, bin_dir, batch_size, targe
     logger.info('Step5 done')
 
 
-def step6(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, target_size, start_pos, cov_cut, cor_cut, skip_em, debug):
+def step6(rbin_dir, cor_dir, cnv_dir, index_tab, cov_file, gender_file, batch_size, target_size, start_pos, cov_cut, cor_cut, skip_em, debug):
     """HMM Call
         # Original Step7
         Rscript /resources/run.R run_hmm_rbin ${project_root} ${sample_index} \
@@ -290,3 +290,6 @@ if __name__ == '__main__':
     elif args.step == 'step5':
         # step 5
         step5(args.index_tab, args.gender_file, args.rbin_dir, args.cor_dir, args.bin_dir, args.batch_size, args.target_size, args.start_pos, args.cor_cut, args.skip_em, args.debug)
+    elif args.step == 'step6':
+        # step 6
+        step6(args.rbin_dir, args.cor_dir, args.cnv_dir, args.index_tab, args.cov_file, args.gender_file, args.batch_size, args.target_size, args.start_pos, args.cov_cut, args.cor_cut, args.skip_em, args.debug)
