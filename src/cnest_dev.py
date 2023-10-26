@@ -222,8 +222,9 @@ def step5 (index_tab, gender_file, rbin_dir, cor_dir, bin_dir, batch_size, targe
         print(cmd5)
         logger.debug('CMD=' + " ".join(cmd5))
         run_cmd(cmd5)
-        logger.info('get_references_to_rbin done')
-        logger.info('Step5 done')
+    
+    logger.info('get_references_to_rbin done')
+    logger.info('Step5 done')
 
 
 def step6(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_file, batch_size, cov_cut, cor_cut, skip_em, debug):
@@ -239,15 +240,20 @@ def step6(rbin_dir, cor_dir, cnv_dir, sample_name, index_tab, cov_file, gender_f
         ## updated version
         Rscript /resources/run.R run_hmm_rbin ${rbin_dir} ${cor_dir} ${cnv_dir} ${sample_name} \
             ${index_tab} ${cov_file} ${gender_file} ${batch_size}
+            
+    index_file, rbin_dir, cor_dir, cnv_dir, gender_file, cov_file, batch_size=1000, cov_cut = 20, cor_cut = 0.9, skip_em=FALSE
+
     """
-    logger.info('Start step5')
-    cmd7 = ['Rscript', '/resources/run.R',
-            'run_hmm_rbin', rbin_dir, cor_dir, cnv_dir, sample_name, index_tab,
-            cov_file, gender_file, str(batch_size), str(cov_cut), str(cor_cut), str(skip_em)]
-    print(cmd7)
-    logger.debug('CMD | ' + " ".join(cmd7))
-    run_cmd(cmd7)
-    logger.info('Step5 done')
+    logger.info('Start step6')
+        for i in range(start_pos, start_pos+target_size):
+        cmd7 = ['Rscript', '/resources/run.R',
+                'run_hmm_rbin', index_tab, rbin_dir, cor_dir, cnv_dir, gender_file, cov_file, 
+                str(batch_size), str(target_size), str(start_pos), str(cov_cut), str(cor_cut), str(skip_em)]
+        print(cmd7)
+        logger.debug('CMD | ' + " ".join(cmd7))
+        run_cmd(cmd7)
+    
+    logger.info('Step6 done')
 
 
 def ix2id(sample_index, gender_file):

@@ -136,23 +136,25 @@ if(args[1] == "processLogRtoBin") {
 if(args[1] == "run_hmm_rbin") {
 	#   Rscript /resources/run.R run_hmm_rbin ${bin_dir} ${cor_dir} ${cnv_dir} ${sample_name} \
     #        ${index_tab} ${cov_file} ${gender_file} ${batch_size}
-	rbin_dir = args[2]
-	cor_dir = args[3]
-	cnv_dir = args[4]
-	sample_name = args[5]
-	index_file = args[6]
+    # index_file, rbin_dir, cor_dir, cnv_dir, gender_file, cov_file, batch_size=1000, target_size, start_pos, cov_cut = 20, cor_cut = 0.9, skip_em=FALSE
+	index_file = args[2]
+	rbin_dir = args[3]
+	cor_dir = args[4]
+	cnv_dir = args[5]
+	gender_file = args[6]
 	cov_file = args[7] # cov_file=/resources/txt_covered_all_coverage.txt 
-	gender_file = args[8]
-	batch_size = args[9]
-    cov_cut = as.numeric(as.character(args[10]))
-    cor_cut = as.numeric(as.character(args[11]))
-    skip_em = as.character(args[12])
+	batch_size = as.numeric(as.character(args[8]))
+	target_size = as.numeric(as.character(args[9]))
+	start_pos = as.numeric(as.character(args[10]))
+    cov_cut = as.numeric(as.character(args[11]))
+    cor_cut = as.numeric(as.character(args[12]))
+    skip_em = as.character(args[13])
     if(skip_em=="True") {
         skip_em = TRUE
     } else {
         skip_em = FALSE
     }
 	print(sample_name)
-	run_hmm_rbin(rbin_dir, sample_name, index_file, cov_file, cor_dir, gender_file, cnv_dir, batch_size, cov_cut, cor_cut, skip_em)
+	run_hmm_rbin(index_file, rbin_dir, cor_dir, cnv_dir, gender_file, cov_file, batch_size, target_size, start_pos, cov_cut, cor_cut, skip_em)
 	print ("run_hmm_rbin")
 }
