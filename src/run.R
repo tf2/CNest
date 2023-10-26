@@ -154,7 +154,6 @@ if(args[1] == "run_hmm_rbin") {
     } else {
         skip_em = FALSE
     }
-	print(sample_name)
 	run_hmm_rbin(index_file, rbin_dir, cor_dir, cnv_dir, gender_file, cov_file, batch_size, target_size, start_pos, cov_cut, cor_cut, skip_em)
 	print ("run_hmm_rbin")
 }
