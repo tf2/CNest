@@ -250,7 +250,7 @@ def step6(rbin_dir, cor_dir, cnv_dir, index_tab, cov_file, gender_file, batch_si
     for i in range(start_pos, start_pos+target_size):
         cmd7 = ['Rscript', '/resources/run.R',
                 'run_hmm_rbin', index_tab, rbin_dir, cor_dir, cnv_dir, gender_file, cov_file, 
-                str(batch_size), str(target_size), str(start_pos), str(cov_cut), str(cor_cut), str(skip_em)]
+                str(batch_size), str(1), str(i), str(cov_cut), str(cor_cut), str(skip_em)]
         print(cmd7)
         logger.debug('CMD | ' + " ".join(cmd7))
         run_cmd(cmd7)
