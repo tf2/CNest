@@ -1,7 +1,7 @@
 ########################################################################
 # Title: Dockerfile for ngscnv - verion 1.0
 # Author: Tomas W Fitzgerald
-# Date: 21/07/2020
+# Date: 22/07/2020
 # Email: tomas@ebi.ac.uk
 ########################################################################
 
@@ -97,14 +97,14 @@ RUN R CMD INSTALL mixtools_1.2.0.tar.gz
 COPY src/ViteRbi_1.0.tar.gz /
 RUN R CMD INSTALL ViteRbi_1.0.tar.gz
 
-COPY src/Rbin_1.1.tar.gz /
-RUN R CMD INSTALL Rbin_1.1.tar.gz
+COPY src/CNest_1.0.tar.gz /
+RUN R CMD INSTALL CNest_1.0.tar.gz
 
 ########################################################################
 # Remove package sources
 ########################################################################
 
-RUN rm -rf /$CNV_APP /Rbin_1.1.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /htslib /segmented_1.2-0.tar.gz /kernlab_0.9-29.tar.gz /MASS_7.3-51.6.tar.gz /survival_3.2-3.tar.gz /mixtools_1.2.0.tar.gz 
+RUN rm -rf /$CNV_APP /CNest_1.0.tar.gz /ViteRbi_1.0.tar.gz /samtools-$VERSION /htslib /segmented_1.2-0.tar.gz /kernlab_0.9-29.tar.gz /MASS_7.3-51.6.tar.gz /survival_3.2-3.tar.gz /mixtools_1.2.0.tar.gz 
 
 ########################################################################
 # Setup the mount locations and copy some resources
@@ -119,7 +119,11 @@ COPY src/run src/run.R src/cnest.py src/cnest_dev.py /resources/
 RUN chmod +x /resources/cnest.py
 RUN chmod +x /resources/cnest_dev.py
 
-ENTRYPOINT ["python3.8", "/resources/cnest_dev.py"]
+# Unset entrypoint
+ENTRYPOINT []
+
+# Set default command
+CMD ["bash"]
 
 ########################################################################
 # Run Notes:
